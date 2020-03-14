@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 #define DEBUG 0
+#define FILE_IS_EMPTY "文件为空，请先增加内容"
 
 const int MAX_LEN = 100;
 char *test = "abc";
@@ -45,6 +47,10 @@ void displayAll();
 int main() {
     filename = "/Users/cg/data/code/wheel/c/notepad/t";
     do {
+        if (DEBUG) {
+            time_t lt = time(NULL);
+            printf("0==%s==time====%ld\n", __FUNCTION__, lt);
+        }
         loadFile(filename);
         int c = firstMenu();
         action(c);
@@ -69,9 +75,14 @@ void action(int menu) {
         case 3:
             // 删除
             printf("请输入行号：\n");
-            scanf("%s", targetLineNumTmp);
-            targetLineNum = atoi(targetLineNumTmp);
+//            scanf("%s", targetLineNumTmp);
+//            targetLineNum = atoi(targetLineNumTmp);
+            targetLineNum = 1;
             deleteLine(targetLineNum);
+            if (DEBUG) {
+                time_t lt = time(NULL);
+                printf("3==%s==time====%ld\n", __FUNCTION__, lt);
+            }
             break;
         case 4:
             //保存
@@ -98,6 +109,10 @@ void exitAction() {
 
 // todo 优化。低效。
 void displayLine(int lineNum) {
+    if (start == NULL) {
+        printf("%s\n", FILE_IS_EMPTY);
+        return;
+    }
     if (DEBUG) {
         printf("lineNum = %d\n", lineNum);
     }
@@ -133,8 +148,11 @@ struct line *findLineBy(int lineNum) {
 
 // todo 没有处理行数
 void deleteLine(int lineNum) {
+    if (start == NULL) {
+        printf("%s\n", FILE_IS_EMPTY);
+        return;
+    }
     struct line *targetLine = findLineBy(lineNum);
-
     // 首行
     if (lineNum == 1) {
         start = (struct line *) malloc(sizeof(struct line));
@@ -169,20 +187,38 @@ void save(char *filename) {
     FILE *fp = fopen(filename, "w");
     char *str;
     struct line *info = start;
-    if(DEBUG){
-        printf("filename:%s\n", filename);
-        printf("%s\n", info->text);
+    if (DEBUG) {
+        time_t lt = time(NULL);
+        printf("5==%s==time====%ld\n", __FUNCTION__, lt);
+        printf("0==%s==%s==%d\n", __FUNCTION__, start->text, start->num);
+        printf("0==%s==%s==%d\n", __FUNCTION__, last->text, last->num);
     }
     while (info) {
+        if (DEBUG) {
+            printf("%s==info->text====%s", __FUNCTION__, info->text);
+        }
         str = info->text;
         while (*str != '\n') {
             fputc(*str, fp);
             str++;
         }
         fputc('\n', fp);
+        if (DEBUG) {
+            printf("2==%s==info->text====%s", __FUNCTION__, info->text);
+        }
         info = info->next;
+        if (DEBUG) {
+            time_t lt;
+            lt = time(NULL);
+            printf("3==%s==time====%ld\n", __FUNCTION__, lt);
+//            printf("3==%s==info->text====%s", __FUNCTION__, info->text);
+        }
     }
-//    fclose(fp);
+    if (DEBUG) {
+        time_t lt = time(NULL);
+        printf("4==%s==time====%ld\n", __FUNCTION__, lt);
+    }
+    fclose(fp);
 //    free(info);
 //    free(str);
 }
@@ -236,7 +272,16 @@ void loadFile(char *filename) {
     char c;
     FILE *fp = fopen(filename, "r");
     tmp = NULL;
+    if (DEBUG) {
+        printf("-1=start=%s==%d==\n", __FUNCTION__, start->num);
+        time_t lt = time(NULL);
+        printf("-1==%s==time====%ld\n", __FUNCTION__, lt);
+    }
     while ((c = fgetc(fp)) != EOF && c != '\n') {
+        if (DEBUG) {
+            time_t lt = time(NULL);
+            printf("while==%s==time====%ld\n", __FUNCTION__, lt);
+        }
         int i = 0;
         info->text[i] = c;
         i++;
@@ -259,18 +304,56 @@ void loadFile(char *filename) {
         tmp = info;
         info = info->next;
     }
+    if (tmp == NULL) {
+        fclose(fp);
+        start = NULL;
+        last = NULL;
+        return;
+    }
+    if (DEBUG) {
+        printf("0=start=%s==%d==\n", __FUNCTION__, start->num);
+        printf("0=last=%s==%d==\n", __FUNCTION__, tmp->num);
+        time_t lt = time(NULL);
+        printf("0==%s==time====%ld\n", __FUNCTION__, lt);
+    }
+    if (DEBUG) {
+        time_t lt = time(NULL);
+        printf("3==%s==time====%ld\n", __FUNCTION__, lt);
+    }
     tmp->next = NULL;
+    if (DEBUG) {
+        time_t lt = time(NULL);
+        printf("3.5==%s==time====%ld\n", __FUNCTION__, lt);
+    }
     last = tmp;
+    if (DEBUG) {
+        time_t lt = time(NULL);
+        printf("4==%s==time====%ld\n", __FUNCTION__, lt);
+    }
     start->prior = NULL;
+    if (DEBUG) {
+        time_t lt = time(NULL);
+        printf("5==%s==time====%ld\n", __FUNCTION__, lt);
+    }
     free(info);
+    if (DEBUG) {
+        time_t lt = time(NULL);
+        printf("6==%s==time====%ld\n", __FUNCTION__, lt);
+    }
     fclose(fp);
     if (DEBUG) {
         printf("%s==start==%s\n", __FUNCTION__, start->text);
         printf("%s==last==%s\n", __FUNCTION__, last->text);
+        printf("start===%s====%d\n", start->text, start->num);
+        printf("last===%s====%d\n", last->text, last->num);
     }
 }
 
 void displayAll() {
+    if (start == NULL) {
+        printf("%s\n", FILE_IS_EMPTY);
+        return;
+    }
     struct line *info;
     info = start;
     while (info) {
