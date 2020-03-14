@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <strings.h>
 
 #define DEBUG 0
 #define FILE_IS_EMPTY "文件为空，请先增加内容"
@@ -63,6 +64,9 @@ void add();
 // 在指定的行插入数据
 void insertInLineNum(int lineNum);
 
+// 获取文件中的所有数据
+char *getStrFromFile();
+
 int main() {
     filename = "/Users/cg/data/code/wheel/c/notepad/t";
     do {
@@ -116,6 +120,9 @@ void action(int menu) {
             break;
         case 7:
             loadFile(filename);
+            break;
+        case 21:
+            insert();
             break;
         default:
             printf("菜单输入错误\n");
@@ -258,10 +265,17 @@ int firstMenu() {
         printf("\t\t5.退出\n");
         printf("\t\t6.显示全部\n");
         printf("\t\t7.打开\n");
-        printf("\t\t请选择一项功能：\n");
+//        printf("\t\t请选择一项功能：\n");
+
+        printf("\t\t21.插入一行文字\n");
+        printf("\t\t22.插入一段文字\n");
+        printf("\t\t23.返回上级菜单\n");
+        printf("\t\t请按数字选择：\n");
+
         scanf("%s", c);
         no = atoi(c);
-        if ((1 <= no && no <= 9)) {
+        printf("no = %d=============\n", no);
+        if ((1 <= no && no <= 99)) {
             if (no == 2) {
                 // 进入插入菜单
                 int res = insertMenu(no);
@@ -277,20 +291,24 @@ int firstMenu() {
 }
 
 int insertMenu() {
-    int c;
     while (1) {
+//        int c = (int)malloc(sizeof(c));
+        char *c2;
+        int c;
         printf("\n\t1.插入一行文字\n");
         printf("\t2.插入一段文字\n");
         printf("\t3.返回上级菜单\n");
         printf("\t请按数字选择：\n");
+//        scanf("%s", c2);
         scanf("%d", &c);
-        printf("c = %d\n", c);
+//        printf("%ld\n", time(NULL));
+//        printf("c2 = %s\n", c2);
+//        int c = atoi(c2);
         if (1 <= c && c <= 3) {
             printf("break\n");
             return c;
         }
     }
-    return c;
 }
 
 void loadFile(char *filename) {
@@ -394,27 +412,35 @@ void displayAll() {
 void insertFunction() {
     int type = insertMenu();
     switch (type) {
-        case 1:
+        case 21:
             // 插入一行文字
             insert();
             break;
-        case 2:
+        case 22:
             // 插入一段文字
             break;
-        case 3:
+        case 23:
             // 返回上级菜单
             break;
     }
 }
 
 void insert() {
-    char *str = (char *) malloc(sizeof(char) * 300);
+    char *str = (char *) malloc(sizeof(char) * MAX_LEN);
     printf("输入数据：\n");
     scanf("%s", str);
+//    fgets(str, MAX_LEN, stdin);
+//    gets(str);
     FILE *fp = fopen(filename, "w");
     fputs(str, fp);
+    fputc('\n', fp);
+    char *str2 = getStrFromFile();
+    printf("str:%s\n", str);
+    printf("str2:%s\n", str2);
+    fputs(str2, fp);
     fclose(fp);
 //    save(filename, "a");
+    free(str);
 }
 
 void add() {
@@ -423,4 +449,22 @@ void add() {
 
 void insertInLineNum(int lineNum) {
 
+}
+
+char *getStrFromFile() {
+    char *str = (char *) malloc(sizeof(char) * MAX_LEN);
+    if (start == NULL) {
+        return str;
+    }
+    struct line *info;
+    info = start;
+    while (info) {
+        strcat(str, info->text);
+        info = info->next;
+        if (info) {
+            str = (char *) realloc(str, sizeof(char) * MAX_LEN);
+        }
+    }
+
+    return str;
 }
