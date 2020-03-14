@@ -429,12 +429,14 @@ void insert() {
     char *str = (char *) malloc(sizeof(char) * MAX_LEN);
     printf("输入数据：\n");
     scanf("%s", str);
-//    fgets(str, MAX_LEN, stdin);
-//    gets(str);
+    char *str2 = getStrFromFile();
     FILE *fp = fopen(filename, "w");
     fputs(str, fp);
-    fputc('\n', fp);
-    char *str2 = getStrFromFile();
+    fgets(str, MAX_LEN, stdin);
+//    gets(str);
+    fputs(str, fp);
+//    fputc('\n', fp);
+
     printf("str:%s\n", str);
     printf("str2:%s\n", str2);
     fputs(str2, fp);
