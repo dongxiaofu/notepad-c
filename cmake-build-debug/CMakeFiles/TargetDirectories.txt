@@ -1,0 +1,3 @@
+/Users/cg/data/code/wheel/c/notepad/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/cg/data/code/wheel/c/notepad/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/cg/data/code/wheel/c/notepad/cmake-build-debug/CMakeFiles/notepad.dir
