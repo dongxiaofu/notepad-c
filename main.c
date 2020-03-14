@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define DEBUG 0
+
 const int MAX_LEN = 100;
+char *test = "abc";
 
 struct line {
     char text[MAX_LEN];
@@ -12,7 +15,7 @@ struct line {
 };
 
 struct line *start, *last;
-int lineNum = 0;
+int lineNum;
 int targetLineNum;
 char *filename;
 
@@ -40,25 +43,24 @@ void save(char *filename);
 void displayAll();
 
 int main() {
-//int main(int argc, char *argv[]) {
-
-    char *str = "Hello\n";
     filename = "/Users/cg/data/code/wheel/c/notepad/t";
-    loadFile(filename);
-//    displayAll();
-
-    int c = firstMenu();
-//    return 0;
-    targetLineNum = 2;//atoi("ssss");
-    action(6);
+    do {
+        loadFile(filename);
+        int c = firstMenu();
+        action(c);
+    } while (1);
 
     return 0;
 }
 
 void action(int menu) {
+    char *targetLineNumTmp = (char *) malloc(sizeof(char) * 3);
     switch (menu) {
         case 1:
             // 显示
+            printf("请输入行号：\n");
+            scanf("%s", targetLineNumTmp);
+            targetLineNum = atoi(targetLineNumTmp);
             displayLine(targetLineNum);
             break;
         case 2:
@@ -66,6 +68,9 @@ void action(int menu) {
             break;
         case 3:
             // 删除
+            printf("请输入行号：\n");
+            scanf("%s", targetLineNumTmp);
+            targetLineNum = atoi(targetLineNumTmp);
             deleteLine(targetLineNum);
             break;
         case 4:
@@ -93,8 +98,10 @@ void exitAction() {
 
 // todo 优化。低效。
 void displayLine(int lineNum) {
+    if(DEBUG){
+        printf("lineNum = %d\n", lineNum);
+    }
     struct line *targetLine = findLineBy(lineNum);
-    printf("===33333targetLine:%s================\n", targetLine->text);
     if (targetLine) {
         printf("%d\t%s", lineNum, targetLine->text);
     } else {
@@ -105,15 +112,21 @@ void displayLine(int lineNum) {
 struct line *findLineBy(int lineNum) {
     struct line *targetLine = NULL;
     struct line *info = start;
-
+    if(DEBUG){
+        printf("%s======%s===%d=\n", __FUNCTION__, start->text, start->num);
+        printf("%s======%s==%d==\n", __FUNCTION__, last->text, last->num);
+        printf("%s==info====%s===%d=\n", __FUNCTION__, info->text, last->num);
+    }
     while (info) {
-//    while (info != NULL) {
-        printf("info234:%s\n", info->text);
         if (info->num == lineNum) {
             targetLine = info;
             break;
         }
         info = info->next;
+    }
+    free(info);
+    if(DEBUG){
+        printf("%s===end===%s========\n", __FUNCTION__, targetLine->text);
     }
     return targetLine;
 }
@@ -121,28 +134,19 @@ struct line *findLineBy(int lineNum) {
 // todo 没有处理行数
 void deleteLine(int lineNum) {
     struct line *targetLine = findLineBy(lineNum);
-    printf("targetLine : %s\t%d\t%d:%d\n", targetLine->text, targetLine->num, start->num, last->num);
-    printf("==============flag===%d=====%d=======\n", lineNum, start->num);
 
     // 首行
 //    if (lineNum == start->num) {
     if (lineNum == 1) {
-
-        printf("1\n");
-
         start = (struct line *) malloc(sizeof(struct line));
         start = targetLine->next;
-        printf("2\n");
         if (start) {
             start->prior = NULL;
         }
 
-        printf("7\n");
         save(filename);
-        printf("8\n");
         exit(0);
     }
-    printf("3\n");
     // 尾行
     if (lineNum == last->num) {
         last = targetLine->prior;
@@ -151,15 +155,11 @@ void deleteLine(int lineNum) {
         exit(0);
     }
     // 其他
-//    printf("0=======%d========%d=======%d====\n", targetLine->prior->num, start->num, targetLine->num);
     if (targetLine->prior->num == start->num) {
         start->next = targetLine->next;
-//        printf("1=======%d========%d===========\n", targetLine->prior->num, start->num);
     } else if (targetLine->next->num == last->num) {
-//        printf("2=====%d========%d=============\n", targetLine->next->num, last->num);
         last->prior = targetLine->prior;
     } else {
-//        printf("3==========================\n");
         targetLine->prior->next = targetLine->next;
         targetLine->next->prior = targetLine->prior;
     }
@@ -187,9 +187,7 @@ void save(char *filename) {
 
 int firstMenu() {
     int no;
-    char *c;
-    char *a;
-    printf("%s:%s\n", __FUNCTION__, last->text);
+    char *c = (char *) malloc(sizeof(char) * 100);
     while (1) {
         printf("\n\t\t1.显示\n");
         printf("\t\t2.插入\n");
@@ -199,11 +197,7 @@ int firstMenu() {
         printf("\t\t6.显示全部\n");
         printf("\t\t7.打开\n");
         printf("\t\t请选择一项功能：\n");
-        printf("%s:%s\n", __FUNCTION__, last->text);
         scanf("%s", c);
-        scanf("%s", a);
-//        c = "hi";
-        printf("scanf:%s:%s\n", __FUNCTION__, last->text);
         no = atoi(c);
         if ((1 <= no && no <= 9)) {
             if (no == 2) {
@@ -217,7 +211,6 @@ int firstMenu() {
             break;
         }
     }
-    printf("%s:%s\n", __FUNCTION__, last->text);
     return no;
 }
 
@@ -234,6 +227,7 @@ int insertMenu() {
 }
 
 void loadFile(char *filename) {
+    lineNum = 0;
     struct line *tmp, *info;
     start = (struct line *) malloc(sizeof(struct line));
     info = start;
@@ -267,13 +261,16 @@ void loadFile(char *filename) {
     last = tmp;
     start->prior = NULL;
     free(info);
-    printf("%s:%s\n", __FUNCTION__, last->text);
+    fclose(fp);
+    if(DEBUG){
+        printf("%s==start==%s\n",__FUNCTION__, start->text);
+        printf("%s==last==%s\n",__FUNCTION__, last->text);
+    }
 }
 
 void displayAll() {
     struct line *info;
     info = start;
-    printf("%s:%s\n", __FUNCTION__, last->text);
     while (info) {
         printf("%s", info->text);
         info = info->next;
