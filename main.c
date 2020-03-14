@@ -98,7 +98,7 @@ void exitAction() {
 
 // todo 优化。低效。
 void displayLine(int lineNum) {
-    if(DEBUG){
+    if (DEBUG) {
         printf("lineNum = %d\n", lineNum);
     }
     struct line *targetLine = findLineBy(lineNum);
@@ -112,7 +112,7 @@ void displayLine(int lineNum) {
 struct line *findLineBy(int lineNum) {
     struct line *targetLine = NULL;
     struct line *info = start;
-    if(DEBUG){
+    if (DEBUG) {
         printf("%s======%s===%d=\n", __FUNCTION__, start->text, start->num);
         printf("%s======%s==%d==\n", __FUNCTION__, last->text, last->num);
         printf("%s==info====%s===%d=\n", __FUNCTION__, info->text, last->num);
@@ -125,7 +125,7 @@ struct line *findLineBy(int lineNum) {
         info = info->next;
     }
     free(info);
-    if(DEBUG){
+    if (DEBUG) {
         printf("%s===end===%s========\n", __FUNCTION__, targetLine->text);
     }
     return targetLine;
@@ -136,23 +136,21 @@ void deleteLine(int lineNum) {
     struct line *targetLine = findLineBy(lineNum);
 
     // 首行
-//    if (lineNum == start->num) {
     if (lineNum == 1) {
         start = (struct line *) malloc(sizeof(struct line));
         start = targetLine->next;
         if (start) {
             start->prior = NULL;
         }
-
         save(filename);
-        exit(0);
+        return;
     }
     // 尾行
     if (lineNum == last->num) {
         last = targetLine->prior;
         last->next = NULL;
         save(filename);
-        exit(0);
+        return;
     }
     // 其他
     if (targetLine->prior->num == start->num) {
@@ -164,17 +162,18 @@ void deleteLine(int lineNum) {
         targetLine->next->prior = targetLine->prior;
     }
     save(filename);
+    return;
 }
 
 void save(char *filename) {
     FILE *fp = fopen(filename, "w");
     char *str;
-    printf("filename:%s\n", filename);
     struct line *info = start;
-    printf("filename:%s\n", filename);
-    printf("%s\n", info->text);
+    if(DEBUG){
+        printf("filename:%s\n", filename);
+        printf("%s\n", info->text);
+    }
     while (info) {
-//    while (info != NULL) {
         str = info->text;
         while (*str != '\n') {
             fputc(*str, fp);
@@ -183,6 +182,9 @@ void save(char *filename) {
         fputc('\n', fp);
         info = info->next;
     }
+//    fclose(fp);
+//    free(info);
+//    free(str);
 }
 
 int firstMenu() {
@@ -262,9 +264,9 @@ void loadFile(char *filename) {
     start->prior = NULL;
     free(info);
     fclose(fp);
-    if(DEBUG){
-        printf("%s==start==%s\n",__FUNCTION__, start->text);
-        printf("%s==last==%s\n",__FUNCTION__, last->text);
+    if (DEBUG) {
+        printf("%s==start==%s\n", __FUNCTION__, start->text);
+        printf("%s==last==%s\n", __FUNCTION__, last->text);
     }
 }
 
