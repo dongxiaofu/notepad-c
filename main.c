@@ -30,23 +30,43 @@ int firstMenu();
 // 插入菜单
 int insertMenu();
 
+// 操作
 void action(int menu);
 
+// 退出
 void exitAction();
 
+// 显示一行
 void displayLine(int lineNum);
 
+// 删除一行
 void deleteLine(int lineNum);
 
+// 查找一行
 struct line *findLineBy(int lineNum);
 
-void save(char *filename);
+// 保存数据
+void save(char *filename, char *mode);
 
+// 显示所有内容
 void displayAll();
+
+// 插入功能
+void insertFunction();
+
+// 在文件开头插入数据
+void insert();
+
+// 追加数据
+void add();
+
+// 在指定的行插入数据
+void insertInLineNum(int lineNum);
 
 int main() {
     filename = "/Users/cg/data/code/wheel/c/notepad/t";
     do {
+        printf("%s==%ld\n", "main0", time(NULL));
         if (DEBUG) {
             time_t lt = time(NULL);
             printf("0==%s==time====%ld\n", __FUNCTION__, lt);
@@ -71,13 +91,13 @@ void action(int menu) {
             break;
         case 2:
             // 插入
+            insertFunction();
             break;
         case 3:
             // 删除
             printf("请输入行号：\n");
-//            scanf("%s", targetLineNumTmp);
-//            targetLineNum = atoi(targetLineNumTmp);
-            targetLineNum = 1;
+            scanf("%s", targetLineNumTmp);
+            targetLineNum = atoi(targetLineNumTmp);
             deleteLine(targetLineNum);
             if (DEBUG) {
                 time_t lt = time(NULL);
@@ -152,6 +172,7 @@ void deleteLine(int lineNum) {
         printf("%s\n", FILE_IS_EMPTY);
         return;
     }
+    char *mode = "w";
     struct line *targetLine = findLineBy(lineNum);
     // 首行
     if (lineNum == 1) {
@@ -160,14 +181,14 @@ void deleteLine(int lineNum) {
         if (start) {
             start->prior = NULL;
         }
-        save(filename);
+        save(filename, mode);
         return;
     }
     // 尾行
     if (lineNum == last->num) {
         last = targetLine->prior;
         last->next = NULL;
-        save(filename);
+        save(filename, mode);
         return;
     }
     // 其他
@@ -179,12 +200,15 @@ void deleteLine(int lineNum) {
         targetLine->prior->next = targetLine->next;
         targetLine->next->prior = targetLine->prior;
     }
-    save(filename);
+    save(filename, mode);
     return;
 }
 
-void save(char *filename) {
-    FILE *fp = fopen(filename, "w");
+void save(char *filename, char *mode) {
+    if (!mode) {
+        mode = "w";
+    }
+    FILE *fp = fopen(filename, mode);
     char *str;
     struct line *info = start;
     if (DEBUG) {
@@ -254,13 +278,18 @@ int firstMenu() {
 
 int insertMenu() {
     int c;
-    printf("\n\t1.插入一行文字\n");
-    printf("\t2.插入一段文字\n");
-    printf("\t3.返回上级菜单\n");
-    do {
+    while (1) {
+        printf("\n\t1.插入一行文字\n");
+        printf("\t2.插入一段文字\n");
+        printf("\t3.返回上级菜单\n");
         printf("\t请按数字选择：\n");
         scanf("%d", &c);
-    } while (!(1 <= c && c <= 3));
+        printf("c = %d\n", c);
+        if (1 <= c && c <= 3) {
+            printf("break\n");
+            return c;
+        }
+    }
     return c;
 }
 
@@ -360,4 +389,38 @@ void displayAll() {
         printf("%s", info->text);
         info = info->next;
     }
+}
+
+void insertFunction() {
+    int type = insertMenu();
+    switch (type) {
+        case 1:
+            // 插入一行文字
+            insert();
+            break;
+        case 2:
+            // 插入一段文字
+            break;
+        case 3:
+            // 返回上级菜单
+            break;
+    }
+}
+
+void insert() {
+    char *str = (char *) malloc(sizeof(char) * 300);
+    printf("输入数据：\n");
+    scanf("%s", str);
+    FILE *fp = fopen(filename, "w");
+    fputs(str, fp);
+    fclose(fp);
+//    save(filename, "a");
+}
+
+void add() {
+
+}
+
+void insertInLineNum(int lineNum) {
+
 }
