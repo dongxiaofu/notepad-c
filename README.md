@@ -112,4 +112,4 @@ main(86572,0x10eef4dc0) malloc: *** error for object 0x10cf9ffac: pointer being 
 main(86572,0x10eef4dc0) malloc: *** set a breakpoint in malloc_error_break to debug
 Abort trap: 6
 
-文件：main.c 分支：
+文件：main.c  insertInLineNum函数 分支：error-04
