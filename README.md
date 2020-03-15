@@ -3,6 +3,15 @@
 1.从一级菜单进入二级菜单
 2.从二级菜单返回一级菜单
 #### 功能
+##### 已完成功能
+1.在开头插入数据
+2.追加数据
+3.指定行、指定列插入数据
+    在内存中操作；若直接操作文件，移动文件指针，不会，太麻烦。
+
+删除指定行数据
+显示指定行数据
+显示全部数据
 ##### 下级菜单与操作联系
 1.所有菜单（不同级别）使用一套编码，编码非常大。
 
@@ -94,3 +103,13 @@ loadAll第二次执行，读取数据为空，是因为第一次执行deleteLine
 文件 main.c 的 insertMenu，分支：error-03
 
 悬而未决
+
+#### pointer being freed was not allocated
+
+错误信息：
+
+main(86572,0x10eef4dc0) malloc: *** error for object 0x10cf9ffac: pointer being freed was not allocated
+main(86572,0x10eef4dc0) malloc: *** set a breakpoint in malloc_error_break to debug
+Abort trap: 6
+
+文件：main.c 分支：
