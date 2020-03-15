@@ -64,6 +64,9 @@ void add();
 // 在指定的行插入数据
 void insertInLineNum();
 
+// 在指定行插入一行数据
+void insertOneLine();
+
 // 获取文件中的所有数据
 char *getStrFromFile();
 
@@ -129,6 +132,9 @@ void action(int menu) {
             break;
         case 24:
             insertInLineNum();
+            break;
+        case 25:
+            insertOneLine();
             break;
         default:
             printf("菜单输入错误\n");
@@ -277,6 +283,7 @@ int firstMenu() {
         printf("\t\t22.追加数据\n");
         printf("\t\t23.返回上级菜单\n");
         printf("\t\t24.在选定行插入数据\n");
+        printf("\t\t25.在指定行插入一行数据\n");
         printf("\t\t请按数字选择：\n");
 
         scanf("%s", c);
@@ -480,7 +487,6 @@ void insertInLineNum() {
     char *text = targetLine->text;
     int textRowNum = targetLine->num;
     int textLength = strlen(text);
-    printf("%s##textLength:%d\n", __FUNCTION__, textLength);
 
     // 要插入的位置比目标行的长度长
     if (rowNum > textLength) {
@@ -492,13 +498,10 @@ void insertInLineNum() {
         for (int i = 0; i < rowNum - textLength - 1; i++) {
             strcat(text, emptyStr);
         }
-        printf("0text: %s\n", text);
         strcat(text, str);
-        printf("1text: %s\nstr:%s\n", text, str);
         char *str2 = (char *) malloc(sizeof(char) * MAX_LEN);
         fgets(str2, MAX_LEN, stdin);
         strcat(text, str2);
-        printf("2text: %s\nstr:%s\n", text, str2);
         // free 操作是否必要？
 //        free(emptyStr);
 //        free(str);
@@ -506,27 +509,20 @@ void insertInLineNum() {
     } else {// 要插入的位置在目标行的中间
         char *str = (char *) malloc(sizeof(char) * MAX_LEN);
         scanf("%s", str);
-        printf("0str:%s\n", str);
         char *cache = (char *) malloc(sizeof(char) * MAX_LEN);
         strcpy(cache, &text[rowNum - 1]);
-        printf("cache:%s\n", cache);
         strcpy(&text[rowNum - 1], str);
-        printf("text:%s\n", text);
         // fgets与上面的scanf，若都使用str，此处会出现Segmentation fault: 11。
         // 在其他地方，同样场景，又不会出现此错误。原因未知。
         char *str2 = (char *) malloc(sizeof(char) * MAX_LEN);
         fgets(str2, MAX_LEN, stdin);
         char trimedLFStr[strlen(str2) - 1];
         int i = 0;
-        while(*str2 != '\n'){
+        while (*str2 != '\n') {
             trimedLFStr[i++] = *str2++;
         }
-        printf("trimedLFStr:%s\n", trimedLFStr);
         strcat(text, trimedLFStr);
         strcat(text, cache);
-        if(1){
-            printf("text: %s\ntrimedLFStr:%s\n", text, trimedLFStr);
-        }
         free(str);
         str = NULL;
         free(cache);
@@ -535,6 +531,47 @@ void insertInLineNum() {
     // 文件存盘
     save(filename, "w");
     // 目标行已经被修改，需要把它放进原来的链表中吗？回答是：不需要。
+}
+
+void insertOneLine()
+{
+    if(start == NULL){
+        printf("%s\n", FILE_IS_EMPTY);
+        return;
+    }
+    printf("输入行号:\n");
+    int lineNum;
+    scanf("%d", &lineNum);
+    return;
+    struct line *targetLine = findLineBy(lineNum);
+    if(targetLine == NULL){
+        printf("不存在%d行\n", lineNum);
+        return;
+    }
+    printf("输入数据:\n");
+//    char *str = NULL;
+    char *str = (char *)malloc(sizeof(char) * MAX_LEN);
+    scanf("%s", str);
+//    char *str2 = NULL;
+    char *str2 = (char *)malloc(sizeof(char) * MAX_LEN);
+    printf("0str2 = %s\n", str2);
+    fgets(str2, MAX_LEN, stdin);
+    char *newStr = (char *)malloc(sizeof(char) * MAX_LEN);
+    strcat(newStr, str);
+    strcat(newStr, str2);
+    printf("str = %s\nstr2 = %s\n", str, str2);
+    struct line *newLine = (struct line *)malloc(sizeof(struct line));
+    strcpy(newLine->text, newStr);
+    printf("newStr = %s\n", newStr);
+    newLine->prior = targetLine->prior;
+    newLine->next = targetLine;
+    if(targetLine->prior){
+        targetLine->prior->next = newLine;
+    }
+    free(newLine);
+    newLine = NULL;
+    printf("2222222");
+    save(filename, "w");
 }
 
 char *getStrFromFile() {
