@@ -138,5 +138,7 @@ Abort trap: 6
         info = info->next;
     }
     
-偶发，原因未知
+偶发，原因未知。
+
+怀疑，是野指针。将上面代码中的info改为info2后，多次测试未复现bug。
     

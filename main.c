@@ -578,12 +578,12 @@ void insertOneLine()
     newLine = NULL;
     printf("2222222\n");
 
-    struct line *info;
-    info = start;
+    struct line *info2;
+    info2 = start;
     int i = 0;
-    while (info){
-        printf("info->num:%d###info->text:%s\n", info->num, info->text);
-        info = info->next;
+    while (info2){
+        printf("info->num:%d###info->text:%s\n", info2->num, info2->text);
+        info2 = info2->next;
         i++;
         if(i == 4){
             break;
