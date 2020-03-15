@@ -123,3 +123,5 @@ main(89173,0x110e8ddc0) malloc: *** set a breakpoint in malloc_error_break to de
 Abort trap: 6
 
 去掉 ``free(str2)`` 后错误消失。
+
+更正确的fix方法，未知。

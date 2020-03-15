@@ -527,8 +527,6 @@ void insertInLineNum() {
         if(1){
             printf("text: %s\ntrimedLFStr:%s\n", text, trimedLFStr);
         }
-        free(str2);
-        str2 = NULL;
         free(str);
         str = NULL;
         free(cache);
