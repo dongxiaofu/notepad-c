@@ -565,6 +565,7 @@ void insertOneLine()
     printf("newStr = %s\n", newStr);
     // 此处的链表操作，容易出现死循环
     newLine->prior = targetLine->prior;
+    printf("targetLine->prior:%p\n", targetLine->prior);
     newLine->next = targetLine;
     if(targetLine->prior){
         targetLine->prior->next = newLine;
@@ -579,9 +580,14 @@ void insertOneLine()
 
     struct line *info;
     info = start;
+    int i = 0;
     while (info){
         printf("info->num:%d###info->text:%s\n", info->num, info->text);
         info = info->next;
+        i++;
+        if(i == 4){
+            break;
+        }
     }
 
     save(filename, "w");

@@ -138,3 +138,5 @@ Abort trap: 6
         info = info->next;
     }
     
+偶发，原因未知
+    
