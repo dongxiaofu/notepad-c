@@ -7,7 +7,7 @@
 #define DEBUG 0
 #define FILE_IS_EMPTY "文件为空，请先增加内容"
 
-const int MAX_LEN = 100;
+const int MAX_LEN = 200;
 char *test = "abc";
 
 struct line {
@@ -123,6 +123,9 @@ void action(int menu) {
             break;
         case 21:
             insert();
+            break;
+        case 22:
+            add();
             break;
         default:
             printf("菜单输入错误\n");
@@ -267,8 +270,8 @@ int firstMenu() {
         printf("\t\t7.打开\n");
 //        printf("\t\t请选择一项功能：\n");
 
-        printf("\t\t21.插入一行文字\n");
-        printf("\t\t22.插入一段文字\n");
+        printf("\t\t21.在开头插入数据\n");
+        printf("\t\t22.追加数据\n");
         printf("\t\t23.返回上级菜单\n");
         printf("\t\t请按数字选择：\n");
 
@@ -446,7 +449,15 @@ void insert() {
 }
 
 void add() {
-
+    char *str = (char *)malloc(sizeof(char)*MAX_LEN);
+    printf("请输入数据：\n");
+    scanf("%s", str);
+    FILE *fp = fopen(filename, "a");
+    fputs(str, fp);
+    fgets(str, MAX_LEN, stdin);
+    fputs(str, fp);
+    fclose(fp);
+    free(str);
 }
 
 void insertInLineNum(int lineNum) {
