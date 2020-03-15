@@ -113,3 +113,13 @@ main(86572,0x10eef4dc0) malloc: *** set a breakpoint in malloc_error_break to de
 Abort trap: 6
 
 文件：main.c  insertInLineNum函数 分支：error-04
+
+#### 野指针
+
+文件：main.c  insertInLineNum函数 第530行 ``free(str2);`` 分支：error-05
+
+main(89173,0x110e8ddc0) malloc: *** error for object 0x7fcaec7001b7: pointer being freed was not allocated
+main(89173,0x110e8ddc0) malloc: *** set a breakpoint in malloc_error_break to debug
+Abort trap: 6
+
+去掉 ``free(str2)`` 后错误消失。

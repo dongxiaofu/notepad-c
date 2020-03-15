@@ -480,16 +480,19 @@ void insertInLineNum() {
     char *text = targetLine->text;
     int textRowNum = targetLine->num;
     int textLength = strlen(text);
+    printf("%s##textLength:%d\n", __FUNCTION__, textLength);
 
     // 要插入的位置比目标行的长度长
     if (rowNum > textLength) {
+        char *str = (char *) malloc(sizeof(char) * MAX_LEN);
+        scanf("%s", str);
         char *emptyStr = " ";
-        for (int i = 0; i < rowNum - textLength; i++) {
+        // 去掉换行符
+        strcpy(&text[textLength - 1], emptyStr);
+        for (int i = 0; i < rowNum - textLength - 1; i++) {
             strcat(text, emptyStr);
         }
         printf("0text: %s\n", text);
-        char *str = (char *) malloc(sizeof(char) * MAX_LEN);
-        scanf("%s", str);
         strcat(text, str);
         printf("1text: %s\nstr:%s\n", text, str);
         char *str2 = (char *) malloc(sizeof(char) * MAX_LEN);
@@ -497,27 +500,39 @@ void insertInLineNum() {
         strcat(text, str2);
         printf("2text: %s\nstr:%s\n", text, str2);
         // free 操作是否必要？
-        free(emptyStr);
-        free(str);
-        free(str2);
+//        free(emptyStr);
+//        free(str);
+//        free(str2);
     } else {// 要插入的位置在目标行的中间
         char *str = (char *) malloc(sizeof(char) * MAX_LEN);
         scanf("%s", str);
+        printf("0str:%s\n", str);
         char *cache = (char *) malloc(sizeof(char) * MAX_LEN);
         strcpy(cache, &text[rowNum - 1]);
+        printf("cache:%s\n", cache);
         strcpy(&text[rowNum - 1], str);
-        strcat(text, cache);
+        printf("text:%s\n", text);
         // fgets与上面的scanf，若都使用str，此处会出现Segmentation fault: 11。
         // 在其他地方，同样场景，又不会出现此错误。原因未知。
         char *str2 = (char *) malloc(sizeof(char) * MAX_LEN);
         fgets(str2, MAX_LEN, stdin);
-        strcat(text, str2);
-        if(DEBUG){
-            printf("text: %s\tstr:%s\n", text, str2);
+        char trimedLFStr[strlen(str2) - 1];
+        int i = 0;
+        while(*str2 != '\n'){
+            trimedLFStr[i++] = *str2++;
+        }
+        printf("trimedLFStr:%s\n", trimedLFStr);
+        strcat(text, trimedLFStr);
+        strcat(text, cache);
+        if(1){
+            printf("text: %s\ntrimedLFStr:%s\n", text, trimedLFStr);
         }
         free(str2);
+        str2 = NULL;
         free(str);
+        str = NULL;
         free(cache);
+        cache = NULL;
     }
     // 文件存盘
     save(filename, "w");

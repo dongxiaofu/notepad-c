@@ -1,45 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-struct List {
-    int v;
-//    struct List *prior;
-    struct List *next;
-};
+#include <strings.h>
 
 int main() {
-    struct List list3 = {3, NULL};
-    struct List list2 = {2, &list3};
-    struct List list1 = {1, &list2};
-
-
-    struct List *p;
-    p = &list1;
-    while (p) {
-        printf("v = %d\n", p->v);
-        p = p->next;
+    char *str = "how are you?\n";
+    printf("str[0]:%c\n", str[0]);      // OK
+    char str2[strlen(str) - 1];
+    int i = 0;
+    while (*str != '\n') {
+        str2[i] = str[i];       // Segmentation fault: 11，上面str[0]可以，这里为啥不行？
+        i++;
     }
-
-    list2.v = 23;
-
-    struct List *p2;
-    p2 = &list1;
-    while (p2) {
-        printf("v = %d\n", p2->v);
-        p2 = p2->next;
-    }
-
-    struct List *p3 = (struct List *)malloc(sizeof(struct List));
-    struct List *p4 = (struct List *)malloc(sizeof(struct List));
-    p4 = &list2;
-    p4->v = 78;
-    printf("p4.v = %d\n", p4->v);
-    p3 = &list1;
-    while(p3){
-        printf("p3v = %d\n", p3->v);
-        p3 = p3->next;
-    }
-
+    str2[i] = '\0';
+    printf("str2:%s######len:%ld\n", str2, strlen(str2));
+    char *str3 = "A";
+    printf("str3:%s######len:%ld\n", str3, strlen(str3));
 
     return 0;
 }
