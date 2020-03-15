@@ -126,3 +126,15 @@ Abort trap: 6
 去掉 ``free(str2)`` 后错误消失。
 
 更正确的fix方法，未知。
+
+#### 链表死循环
+
+场景：main.c insertOneLine，输入 25,1,how are you 时，info->next是它自身 分支：error-06
+
+    struct line *info;
+    info = start;
+    while (info){
+        printf("info->num:%d###info->text:%s\n", info->num, info->text);
+        info = info->next;
+    }
+    

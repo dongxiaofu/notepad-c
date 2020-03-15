@@ -542,7 +542,7 @@ void insertOneLine()
     printf("输入行号:\n");
     int lineNum;
     scanf("%d", &lineNum);
-    return;
+//    return;
     struct line *targetLine = findLineBy(lineNum);
     if(targetLine == NULL){
         printf("不存在%d行\n", lineNum);
@@ -563,14 +563,27 @@ void insertOneLine()
     struct line *newLine = (struct line *)malloc(sizeof(struct line));
     strcpy(newLine->text, newStr);
     printf("newStr = %s\n", newStr);
+    // 此处的链表操作，容易出现死循环
     newLine->prior = targetLine->prior;
     newLine->next = targetLine;
     if(targetLine->prior){
         targetLine->prior->next = newLine;
     }
+    targetLine->prior = newLine;
+    if(targetLine->num == 1){
+        start = newLine;
+    }
     free(newLine);
     newLine = NULL;
-    printf("2222222");
+    printf("2222222\n");
+
+    struct line *info;
+    info = start;
+    while (info){
+        printf("info->num:%d###info->text:%s\n", info->num, info->text);
+        info = info->next;
+    }
+
     save(filename, "w");
 }
 
