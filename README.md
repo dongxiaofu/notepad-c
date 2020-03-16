@@ -147,7 +147,7 @@ Abort trap: 6
 
 #### 文件链表结点顺序异常
 
-场景：main.c loadFile 分支：error-06
+场景：main.c loadFile 分支：error-07
 
 顺序异常，原因未知。
 
