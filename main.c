@@ -94,19 +94,20 @@ void replace();
 char *openFile();
 // 检查文件是否存在
 BOOL fileExists(char *filename);
+
 // 新建文件
-char *createFile();
+void createFile(char *filename);
 
 int main(int argc, char *argv[]) {
-    if(argc != 2){
-        printf("输入文件名：");
-        filename = (char *)malloc(sizeof(char) * 10);
-        scanf("%s", filename);
-        if(fileExists(filename) == FALSE){
-            printf("文件 %s 不存在\n", filename);
-            return 0;
-        }
+    if (argc != 2) {
+        printf("usage:notepad filename\n");
+        return 0;
     }
+
+    filename = (char *) malloc(sizeof(char) * 10);
+    filename = argv[1];
+    createFile(filename);
+
     do {
         int c = firstMenu();
         loadFile(filename);
@@ -136,10 +137,6 @@ void action(int menu) {
             scanf("%s", targetLineNumTmp);
             targetLineNum = atoi(targetLineNumTmp);
             deleteLine(targetLineNum);
-            if (DEBUG) {
-                time_t lt = time(NULL);
-                printf("3==%s==time====%ld\n", __FUNCTION__, lt);
-            }
             break;
         case 4:
             //保存
@@ -849,7 +846,7 @@ void replace() {
 
 char *openFile() {
     printf("输入文件名：\n");
-    char* filename1 = (char *)malloc(sizeof(char) * 10);
+    char *filename1 = (char *) malloc(sizeof(char) * 10);
     filename = filename1;
     scanf("%s", filename);
     if (strlen(filename) == 0) {
@@ -869,5 +866,12 @@ BOOL fileExists(char *filename) {
         return TRUE;
     } else {
         return FALSE;
+    }
+}
+
+void createFile(char *filename) {
+    if (fileExists(filename) == FALSE) {
+        FILE *fp = fopen(filename, "w");
+        fclose(fp);
     }
 }
