@@ -2,6 +2,8 @@
 #include<unistd.h>
 
 int main() {
+    char *c;
+    scanf("%s", c);
 //    char *filename = "/Users/cg/data/code/wheel/c/notepad/README.md";
     char *filename = "README.md";
     if (access(filename, F_OK) == 0) {

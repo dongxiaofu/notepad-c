@@ -98,15 +98,17 @@ BOOL fileExists(char *filename);
 char *createFile();
 
 int main(int argc, char *argv[]) {
-//    filename = "/Users/cg/data/code/wheel/c/notepad/t";
-//    filename = openFile();
+    if(argc != 2){
+        printf("输入文件名：");
+        filename = (char *)malloc(sizeof(char) * 10);
+        scanf("%s", filename);
+        if(fileExists(filename) == FALSE){
+            printf("文件 %s 不存在\n", filename);
+            return 0;
+        }
+    }
     do {
         int c = firstMenu();
-        if (c == 30) {
-            filename = openFile();
-        } else if (c == 31) {
-            filename = createFile();
-        }
         loadFile(filename);
         action(c);
     } while (1);
@@ -194,9 +196,6 @@ void displayLine(int lineNum) {
     if (start == NULL) {
         printf("%s\n", FILE_IS_EMPTY);
         return;
-    }
-    if (DEBUG) {
-        printf("lineNum = %d\n", lineNum);
     }
     struct line *targetLine = findLineBy(lineNum);
     if (targetLine) {
@@ -866,10 +865,9 @@ char *openFile() {
 }
 
 BOOL fileExists(char *filename) {
-    return TRUE;
-//    if (access(filename, F_OK)) {
-//        return TRUE;
-//    } else {
-//        return FALSE;
-//    }
+    if (access(filename, F_OK) == 0) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
