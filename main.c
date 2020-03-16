@@ -75,6 +75,12 @@ void insertEmptyLine();
 // 获取文件中的所有数据
 char *getStrFromFile();
 
+// 查找字符串返回第一个结果
+void search();
+
+// 查找字符串返回所有结果
+void searchAll();
+
 int main() {
     filename = "/Users/cg/data/code/wheel/c/notepad/t";
     do {
@@ -143,6 +149,12 @@ void action(int menu) {
             break;
         case 26:
             insertEmptyLine();
+            break;
+        case 27:
+            search();
+            break;
+        case 28:
+            searchAll();
             break;
         default:
             printf("菜单输入错误\n");
@@ -294,6 +306,9 @@ int firstMenu() {
         printf("\t\t24.在选定行插入数据\n");
         printf("\t\t25.在指定行插入一行数据\n");
         printf("\t\t26.在指定行插入空白行\n");
+        printf("\t\t27.查找字符串返回第一个结果\n");
+        printf("\t\t28.查找字符串返回所有结果\n");
+
         printf("\t\t请按数字选择：\n");
 
         scanf("%s", c);
@@ -463,8 +478,12 @@ void insertInLineNum() {
     printf("请输入列数：\n");
     int rowNum;
     scanf("%d", &rowNum);
-    printf("请输入数据：\n");
     struct line *targetLine = findLineBy(lineNum);
+    if (targetLine == NULL) {
+        printf("第%d行第%d列不存在\n", lineNum, rowNum);
+        return;
+    }
+    printf("请输入数据：\n");
     char *text = targetLine->text;
     int textRowNum = targetLine->num;
     int textLength = strlen(text);
@@ -522,7 +541,6 @@ void insertOneLine() {
     printf("输入行号:\n");
     int lineNum;
     scanf("%d", &lineNum);
-//    return;
     struct line *targetLine = findLineBy(lineNum);
     if (targetLine == NULL) {
         printf("不存在%d行\n", lineNum);
@@ -621,4 +639,108 @@ char *getStrFromFile() {
     }
 
     return str;
+}
+
+void search() {
+    char *str = (char *) malloc(sizeof(char) * 10);
+    printf("输入关键词：\n");
+    scanf("%s", str);
+    printf("str:%s\n", str);
+    if (strlen(str) == 0) {
+        printf("关键词不能为空\n");
+        return;
+    }
+    int strLen = strlen(str);
+    struct line *info7 = start;
+    printf("start:%s\n", start->text);
+    while (info7) {
+        int k;
+        int length = strlen(info7->text);
+        printf("length:%d\n", length);
+        for (int i = 0; i < length; i++) {
+            k = i;
+            int j;
+            for (j = 0; j < strLen; j++) {
+                if (str[j] != info7->text[k++]) {
+                    break;
+                }
+            }
+            if (j == strLen) {
+                printf("字符串：%s在第%d行第%d列第一次出现\n", str, info7->num, k - strLen + 1);
+                return;
+            }
+        }
+        info7 = info7->next;
+    }
+    printf("没有查找到字符串：%s\n", str);
+    return;
+}
+
+void searchAll() {
+    char *str = (char *) malloc(sizeof(char) * 10);
+    printf("输入关键词：\n");
+    scanf("%s", str);
+    int strLen = strlen(str);
+
+    if (strLen == 0) {
+        printf("关键词不能为空\n");
+        return;
+    }
+    struct Result {
+        int line;        // 行
+        int row;         // 列
+        int index;       // 序数
+        struct Result *next;
+    };
+
+    // 不能使用数组，使用链表代替
+//    struct Result results[] = {};
+
+    struct line *info7 = start;
+
+    struct Result *result = (struct Result *) malloc(sizeof(struct Result));
+    struct Result *head = (struct Result *) malloc(sizeof(struct Result));
+    int counter = 0;
+    while (info7) {
+        int k;
+        for (int i = 0; i < strlen(info7->text); i++) {
+            k = i;
+            int j;
+            for (j = 0; j < strLen; j++) {
+                if (str[j] != info7->text[k++]) {
+                    break;
+                }
+            }
+            // 查找到了目标
+            if (j == strLen) {
+                result->line = info7->num;
+                result->row = k - strLen + 1;
+                result->next = (struct Result *) malloc(sizeof(struct Result));
+                if (result->next == NULL) {
+                    printf("内存不足\n");
+                    exit(0);
+                }
+                counter++;
+                result->index = counter;
+                if (counter == 1) {
+                    head = result;
+                }
+                result = result->next;
+            }
+        }
+        info7 = info7->next;
+    }
+
+    // 最后一个result是没有赋值的
+    if (result->index > 0) {
+        result->next = NULL;
+    }
+
+    printf("字符串 %s 搜索结果：\n", str);
+    struct Result *result1 = head;
+    // 因为最后一个result是没有赋值的，所有需要 result1->index > 0 排除最后一个
+    while (result1 && result1->index > 0) {
+        printf("第%d行第%d列\n", result1->line, result1->row);
+        result1 = result1->next;
+    }
 }
