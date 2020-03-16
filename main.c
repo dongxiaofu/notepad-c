@@ -835,7 +835,7 @@ void replace() {
 //    strcpy(newStr, rightCache);
 
     printf("处理结果：\n");
-    printf("已经将第%d行第%d列的%s替换为%s\n", targetLine->num, position, str, replaceStr);
+    printf("已经将第%d行第%d列的%s替换为%s\n", targetLine->num, position+1, str, replaceStr);
     printf("新数据为：\n");
     printf("%s\n", newStr);
 
