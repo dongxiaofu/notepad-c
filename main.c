@@ -81,6 +81,9 @@ void search();
 // 查找字符串返回所有结果
 void searchAll();
 
+//字符串替换（一个）
+void replace();
+
 int main() {
     filename = "/Users/cg/data/code/wheel/c/notepad/t";
     do {
@@ -155,6 +158,9 @@ void action(int menu) {
             break;
         case 28:
             searchAll();
+            break;
+        case 29:
+            replace();
             break;
         default:
             printf("菜单输入错误\n");
@@ -308,6 +314,7 @@ int firstMenu() {
         printf("\t\t26.在指定行插入空白行\n");
         printf("\t\t27.查找字符串返回第一个结果\n");
         printf("\t\t28.查找字符串返回所有结果\n");
+        printf("\t\t29.字符串替换（一个）\n");
 
         printf("\t\t请按数字选择：\n");
 
@@ -743,4 +750,83 @@ void searchAll() {
         printf("第%d行第%d列\n", result1->line, result1->row);
         result1 = result1->next;
     }
+}
+
+void replace() {
+    printf("输入关键词:\n");
+    char *str = (char *) malloc(sizeof(char) * 10);
+    scanf("%s", str);
+    int strLen = strlen(str);
+    if (strLen == 0) {
+        printf("关键词不能为空\n");
+        exit(0);
+    }
+    printf("输入替代关键词：\n");
+    char *replaceStr = (char *) malloc(sizeof(char) * 10);
+    scanf("%s", replaceStr);
+    if (strlen(replaceStr) == 0) {
+        printf("替代关键词不能为空\n");
+        exit(0);
+    }
+    typedef struct {
+        struct line *line;  // 包含关键词的行
+        int position;   // 关键词在目标行的列号
+        int flag:1;     // 是否存在搜索结果
+    } Result;
+    struct line *line = (struct line *) malloc(sizeof(struct line));
+    line = start;
+    struct line *targetLine = (struct line *) malloc(sizeof(struct line));
+    Result *result = (Result *) malloc(sizeof(Result));
+    while (line) {
+        for (int i = 0; i < strlen(line->text); i++) {
+            int k = i;
+            int j;
+            for (j = 0; j < strLen; j++) {
+                if (str[j] != line->text[k++]) {
+                    break;
+                }
+            }
+
+            if (j == strLen) {
+                result->line = line;
+                result->position = k - strLen;
+                result->flag = 1;
+                break;
+            }
+        }
+        if (result->flag == 1) {
+            break;
+        }
+        line = line->next;
+    }
+    if (result->flag == 0) {
+        printf("没有查到字符串 %s\n", str);
+        return;
+    }
+    targetLine = result->line;
+    int position = result->position;
+    // 申请内存远大于所需内存，会造成浪费吗？有方法不这样浪费内存吗？
+    char *newStr = (char *) malloc(sizeof(char) * MAX_LEN);
+    char *leftCache = (char *) malloc(sizeof(char) * (MAX_LEN / 2));
+    char *rightCache = (char *) malloc(sizeof(char) * (MAX_LEN / 2));
+    // position的值，涉及到一两个字符，容易弄错。我是举例来确定的。
+    strncpy(leftCache, targetLine->text, position);
+    printf("leftCache:%s\n", leftCache);
+    strcpy(rightCache, &targetLine->text[position + strLen]);
+    printf("rightCache:%s\n", rightCache);
+    strcpy(newStr, leftCache);
+    strcat(newStr, replaceStr);
+    strcat(newStr, rightCache);
+    // 这种方法，最后会将rightCache指向的数据复制到newStr指向的内存中
+//    strcpy(newStr, replaceStr);
+//    strcpy(newStr, rightCache);
+
+    printf("处理结果：\n");
+    printf("已经将第%d行第%d列的%s替换为%s\n", targetLine->num, position, str, replaceStr);
+    printf("新数据为：\n");
+    printf("%s\n", newStr);
+
+    // 只需修改这个结点，并不需要再将修改后的结点嵌入文件数据链表中。
+    strcpy(targetLine->text, newStr);
+    save(filename, "w");
 }
