@@ -163,5 +163,7 @@ Abort trap: 6
         start = tmp;
     }
     
- 问题被修复。关键在于 `tmp->num == 1` 
+ 问题被修复。关键在于 `tmp->num == 1` 。
+ 
+ 修复分支 fix-07
     

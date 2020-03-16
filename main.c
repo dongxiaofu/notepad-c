@@ -273,7 +273,6 @@ void save(char *filename, char *mode) {
     }
     fclose(fp);
 //    free(info);
-//    free(str);
 }
 
 int firstMenu() {
@@ -339,7 +338,6 @@ int insertMenu() {
 void loadFile(char *filename) {
     lineNum = 0;
     struct line *tmp;
-    struct line *start2;
     char c;
     FILE *fp = fopen(filename, "r");
     tmp = NULL;
@@ -377,7 +375,7 @@ void loadFile(char *filename) {
         }
         info->prior = tmp;
         tmp = info;
-        if (start == NULL) {
+        if (tmp->num == 1) {
             start = info;
         }
 
@@ -394,7 +392,6 @@ void loadFile(char *filename) {
     last = tmp;
 
     struct line *info6;
-//    start = start2;
     start->prior = NULL;
     info6 = start;
     printf("===========info6 start============\n");
@@ -406,27 +403,6 @@ void loadFile(char *filename) {
         info6 = info6->next;
     }
     printf("===========info6 end============\n");
-//    printf("===========info6 start============\n");
-//    printf("num:%d######text:%s\n", info6->num, info6->text);
-//    printf("num:%d######text:%s\n", info6->next->num, info6->next->text);
-//    printf("num:%d######text:%s\n", info6->next->next->num, info6->next->next->text);
-////    printf("num:%d######text:%s\n", last->num, last->text);
-//    printf("===========info6 end============\n");
-
-
-
-//    while (info6) {
-//        printf("222last%s#####text:%s\n", __FUNCTION__, last->text);
-//        printf("222last-num%s#####num:%d\n", __FUNCTION__, last->num);
-//        printf("2222222666%s#####text:%s\n", __FUNCTION__, info6->text);
-//        printf("222222222222s666%s#####num:%d\n", __FUNCTION__, info6->num);
-//        info6 = info6->next;
-//    }
-
-
-
-
-
     free(info);
     fclose(fp);
     printf("%s####start:%d\n", __FUNCTION__, start->num);
