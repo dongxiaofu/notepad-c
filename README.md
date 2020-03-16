@@ -18,6 +18,7 @@
 9.查找字符串返回第一个结果
 10.查找字符串返回所有结果
 11.字符串替换（一个）
+12.打开文件
 
 ##### 下级菜单与操作联系
 1.所有菜单（不同级别）使用一套编码，编码非常大。
@@ -170,3 +171,16 @@ Abort trap: 6
  
  修复分支 fix-07
     
+#### Undefined symbols for architecture x86_64
+
+错误信息：
+
+Undefined symbols for architecture x86_64:
+  "_createFile", referenced from:
+      _main in main-3321f0.o
+ld: symbol(s) not found for architecture x86_64
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+
+在文件 main.c 中的 char *openFile()，分支 error-08
+
+

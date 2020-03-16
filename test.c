@@ -1,15 +1,14 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
+#include<unistd.h>
 
 int main() {
-    int nums[] = {};
-
-    for(int i = 0; i < 5; i++){
-        nums[i] = i;
+//    char *filename = "/Users/cg/data/code/wheel/c/notepad/README.md";
+    char *filename = "README.md";
+    if (access(filename, F_OK) == 0) {
+        puts("Exists");
+    } else {
+        puts("Dose not exist");
     }
-
-    printf("nums[i] = %d\n", nums[0]);
 
     return 0;
 }

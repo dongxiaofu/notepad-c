@@ -3,9 +3,15 @@
 #include <unistd.h>
 #include <time.h>
 #include <strings.h>
+#include <unistd.h>
 
 #define DEBUG 0
 #define FILE_IS_EMPTY "文件为空，请先增加内容"
+
+// 定义布尔类型
+#define BOOL int
+#define TRUE 1
+#define FALSE 0
 
 const int MAX_LEN = 200;
 char *test = "abc";
@@ -84,16 +90,24 @@ void searchAll();
 //字符串替换（一个）
 void replace();
 
-int main() {
-    filename = "/Users/cg/data/code/wheel/c/notepad/t";
+//打开文件
+char *openFile();
+// 检查文件是否存在
+BOOL fileExists(char *filename);
+// 新建文件
+char *createFile();
+
+int main(int argc, char *argv[]) {
+//    filename = "/Users/cg/data/code/wheel/c/notepad/t";
+//    filename = openFile();
     do {
-        if (DEBUG) {
-            time_t lt = time(NULL);
-            printf("0==%s==time====%ld\n", __FUNCTION__, lt);
+        int c = firstMenu();
+        if (c == 30) {
+            filename = openFile();
+        } else if (c == 31) {
+            filename = createFile();
         }
         loadFile(filename);
-
-        int c = firstMenu();
         action(c);
     } while (1);
 
@@ -161,6 +175,9 @@ void action(int menu) {
             break;
         case 29:
             replace();
+            break;
+        case 30:
+            openFile();
             break;
         default:
             printf("菜单输入错误\n");
@@ -315,6 +332,8 @@ int firstMenu() {
         printf("\t\t27.查找字符串返回第一个结果\n");
         printf("\t\t28.查找字符串返回所有结果\n");
         printf("\t\t29.字符串替换（一个）\n");
+        printf("\t\t30.打开文件\n");
+        printf("\t\t31.新建文件\n");
 
         printf("\t\t请按数字选择：\n");
 
@@ -702,9 +721,7 @@ void searchAll() {
 
     // 不能使用数组，使用链表代替
 //    struct Result results[] = {};
-
     struct line *info7 = start;
-
     struct Result *result = (struct Result *) malloc(sizeof(struct Result));
     struct Result *head = (struct Result *) malloc(sizeof(struct Result));
     int counter = 0;
@@ -829,4 +846,30 @@ void replace() {
     // 只需修改这个结点，并不需要再将修改后的结点嵌入文件数据链表中。
     strcpy(targetLine->text, newStr);
     save(filename, "w");
+}
+
+char *openFile() {
+    printf("输入文件名：\n");
+    char* filename1 = (char *)malloc(sizeof(char) * 10);
+    filename = filename1;
+    scanf("%s", filename);
+    if (strlen(filename) == 0) {
+        printf("文件名不能为空\n");
+        exit(0);
+    }
+    if (fileExists(filename) == FALSE) {
+        printf("文件 %s 不存在\n", filename);
+        exit(0);
+    }
+
+    return filename;
+}
+
+BOOL fileExists(char *filename) {
+    return TRUE;
+//    if (access(filename, F_OK)) {
+//        return TRUE;
+//    } else {
+//        return FALSE;
+//    }
 }
