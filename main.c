@@ -176,17 +176,17 @@ struct line *findLineBy(int linenum) {
     info6 = start;
     while (info6) {
         if (linenum != info6->num) {
-            printf("666%s#####text:%s\n", __FUNCTION__, info6->text);
-            printf("666%s#####num:%d\n", __FUNCTION__, info6->num);
+//            printf("666%s#####text:%s\n", __FUNCTION__, info6->text);
+//            printf("666%s#####num:%d\n", __FUNCTION__, info6->num);
             info6 = info6->next;
         } else {
-            printf("777%s#####text:%s\n", __FUNCTION__, info6->text);
-            printf("777%s#####num:%d\n", __FUNCTION__, info6->num);
+//            printf("777%s#####text:%s\n", __FUNCTION__, info6->text);
+//            printf("777%s#####num:%d\n", __FUNCTION__, info6->num);
             break;
         }
     }
-    printf("2222%s#####text:%s\n", __FUNCTION__, info6->text);
-    printf("2222%s#####num:%d\n", __FUNCTION__, info6->num);
+//    printf("2222%s#####text:%s\n", __FUNCTION__, info6->text);
+//    printf("2222%s#####num:%d\n", __FUNCTION__, info6->num);
     return (info6);
 }
 
@@ -298,7 +298,6 @@ int firstMenu() {
 
         scanf("%s", c);
         no = atoi(c);
-        printf("no = %d=============\n", no);
         if ((1 <= no && no <= 99)) {
             if (no == 2) {
                 // 进入插入菜单
@@ -343,12 +342,6 @@ void loadFile(char *filename) {
     tmp = NULL;
     struct line *info = (struct line *) malloc(sizeof(struct line));
     while ((c = fgetc(fp)) != EOF) {
-        if (tmp) {
-            printf("%d######text:%s\n", tmp->num, tmp->text);
-        } else {
-            printf("tmp is NULL\n");
-        }
-
         int i = 0;
         if (c == '\n') {
             info->text[i] = '\n';
@@ -394,18 +387,8 @@ void loadFile(char *filename) {
     struct line *info6;
     start->prior = NULL;
     info6 = start;
-    printf("===========info6 start============\n");
-    while (info6) {
-        printf("num:%d######text:%s\n", info6->num, info6->text);
-//        printf("num:%d######text:%s\n", info6->next->num, info6->next->text);
-//        printf("num:%d######text:%s\n", info6->next->next->num, info6->next->next->text);
-//    printf("num:%d######text:%s\n", last->num, last->text);
-        info6 = info6->next;
-    }
-    printf("===========info6 end============\n");
     free(info);
     fclose(fp);
-    printf("%s####start:%d\n", __FUNCTION__, start->num);
 }
 
 void displayAll() {
@@ -453,7 +436,7 @@ void insert() {
     printf("str2:%s\n", str2);
     fputs(str2, fp);
     fclose(fp);
-//    save(filename, "a");
+    save(filename, "a");
     free(str);
 }
 
@@ -546,10 +529,8 @@ void insertOneLine() {
         return;
     }
     printf("输入数据:\n");
-//    char *str = NULL;
     char *str = (char *) malloc(sizeof(char) * MAX_LEN);
     scanf("%s", str);
-//    char *str2 = NULL;
     char *str2 = (char *) malloc(sizeof(char) * MAX_LEN);
     printf("0str2 = %s\n", str2);
     fgets(str2, MAX_LEN, stdin);
@@ -573,13 +554,11 @@ void insertOneLine() {
     }
     free(newLine);
     newLine = NULL;
-    printf("2222222\n");
 
     struct line *info2;
     info2 = start;
     int i = 0;
     while (info2) {
-        printf("info->num:%d###info->text:%s\n", info2->num, info2->text);
         info2 = info2->next;
         i++;
         if (i == 4) {
@@ -597,7 +576,6 @@ void insertEmptyLine() {
     int lineNum;
     printf("输入行号：\n");
     scanf("%d", &lineNum);
-//    lineNum = 2;
     struct line *targetLine = findLineBy(lineNum);
     if (targetLine == NULL) {
         printf("%s\n", "目标行不存在");
@@ -606,7 +584,6 @@ void insertEmptyLine() {
 
     struct line *newLine = (struct line *) malloc(sizeof(struct line));
     newLine->text[0] = '\n';
-//    newLine->text[1] = '\0';
 
     // 在首行插入
     if (start->num == targetLine->num) {
@@ -618,9 +595,7 @@ void insertEmptyLine() {
         targetLine->prior->next = newLine;
         targetLine->prior = newLine;
     }
-//
     struct line *info4;
-//    struct line *info4 = (struct line *) malloc(sizeof(struct line));
     info4 = start;
     while (info4) {
         printf("info4:%s\n", info4->text);
