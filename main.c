@@ -23,6 +23,7 @@ int targetLineNum;
 char *filename;
 
 // 载入文件
+// OK
 void loadFile(char *filename);
 
 // 一级菜单
@@ -44,6 +45,7 @@ void displayLine(int lineNum);
 void deleteLine(int lineNum);
 
 // 查找一行
+// OK
 struct line *findLineBy(int lineNum);
 
 // 保存数据
@@ -67,18 +69,21 @@ void insertInLineNum();
 // 在指定行插入一行数据
 void insertOneLine();
 
+// 在指定行插入空白行
+void insertEmptyLine();
+
 // 获取文件中的所有数据
 char *getStrFromFile();
 
 int main() {
     filename = "/Users/cg/data/code/wheel/c/notepad/t";
     do {
-        printf("%s==%ld\n", "main0", time(NULL));
         if (DEBUG) {
             time_t lt = time(NULL);
             printf("0==%s==time====%ld\n", __FUNCTION__, lt);
         }
         loadFile(filename);
+
         int c = firstMenu();
         action(c);
     } while (1);
@@ -136,6 +141,9 @@ void action(int menu) {
         case 25:
             insertOneLine();
             break;
+        case 26:
+            insertEmptyLine();
+            break;
         default:
             printf("菜单输入错误\n");
     }
@@ -163,27 +171,51 @@ void displayLine(int lineNum) {
     }
 }
 
-struct line *findLineBy(int lineNum) {
-    struct line *targetLine = NULL;
-    struct line *info = start;
-    if (DEBUG) {
-        printf("%s======%s===%d=\n", __FUNCTION__, start->text, start->num);
-        printf("%s======%s==%d==\n", __FUNCTION__, last->text, last->num);
-        printf("%s==info====%s===%d=\n", __FUNCTION__, info->text, last->num);
-    }
-    while (info) {
-        if (info->num == lineNum) {
-            targetLine = info;
+struct line *findLineBy(int linenum) {
+    struct line *info6;
+    info6 = start;
+    while (info6) {
+        if (linenum != info6->num) {
+            printf("666%s#####text:%s\n", __FUNCTION__, info6->text);
+            printf("666%s#####num:%d\n", __FUNCTION__, info6->num);
+            info6 = info6->next;
+        } else {
+            printf("777%s#####text:%s\n", __FUNCTION__, info6->text);
+            printf("777%s#####num:%d\n", __FUNCTION__, info6->num);
             break;
         }
-        info = info->next;
     }
-    free(info);
-    if (DEBUG) {
-        printf("%s===end===%s========\n", __FUNCTION__, targetLine->text);
-    }
-    return targetLine;
+    printf("2222%s#####text:%s\n", __FUNCTION__, info6->text);
+    printf("2222%s#####num:%d\n", __FUNCTION__, info6->num);
+    return (info6);
 }
+
+//struct line *findLineBy(int lineNum) {
+//    struct line *targetLine = NULL;
+////    struct line *info = start;
+//    struct line *info = (struct line *) malloc(sizeof(struct line));
+//    info = start;
+//    printf("000%s#####text:%s\n", __FUNCTION__, start->text);
+//    while (info) {
+//        if (info->num == lineNum) {
+//            targetLine = info;
+//            break;
+//        }
+//        info->next = (struct line *) malloc(sizeof(struct line));
+//        if (!info->next) {
+//            printf("内存已经用完\n");
+//            exit(0);
+//        }
+//        info = info->next;
+//    }
+//    printf("1111%s#####text:%s\n", __FUNCTION__, start->text);
+//    printf("33333%s#####text:%s\n", __FUNCTION__, targetLine->text);
+//    free(info);   // 又导致野指针
+////    main(99051,0x10de32dc0) malloc: *** error for object 0x7fe023d00000: pointer being freed was not allocated
+////    main(99051,0x10de32dc0) malloc: *** set a breakpoint in malloc_error_break to debug
+//    printf("2222%s#####text:%s\n", __FUNCTION__, targetLine->text);
+//    return targetLine;
+//}
 
 // todo 没有处理行数
 void deleteLine(int lineNum) {
@@ -230,36 +262,14 @@ void save(char *filename, char *mode) {
     FILE *fp = fopen(filename, mode);
     char *str;
     struct line *info = start;
-    if (DEBUG) {
-        time_t lt = time(NULL);
-        printf("5==%s==time====%ld\n", __FUNCTION__, lt);
-        printf("0==%s==%s==%d\n", __FUNCTION__, start->text, start->num);
-        printf("0==%s==%s==%d\n", __FUNCTION__, last->text, last->num);
-    }
     while (info) {
-        if (DEBUG) {
-            printf("%s==info->text====%s", __FUNCTION__, info->text);
-        }
         str = info->text;
-        while (*str != '\n') {
+        while (*str) {
             fputc(*str, fp);
             str++;
         }
-        fputc('\n', fp);
-        if (DEBUG) {
-            printf("2==%s==info->text====%s", __FUNCTION__, info->text);
-        }
+//        fputc('\n', fp);
         info = info->next;
-        if (DEBUG) {
-            time_t lt;
-            lt = time(NULL);
-            printf("3==%s==time====%ld\n", __FUNCTION__, lt);
-//            printf("3==%s==info->text====%s", __FUNCTION__, info->text);
-        }
-    }
-    if (DEBUG) {
-        time_t lt = time(NULL);
-        printf("4==%s==time====%ld\n", __FUNCTION__, lt);
     }
     fclose(fp);
 //    free(info);
@@ -284,6 +294,7 @@ int firstMenu() {
         printf("\t\t23.返回上级菜单\n");
         printf("\t\t24.在选定行插入数据\n");
         printf("\t\t25.在指定行插入一行数据\n");
+        printf("\t\t26.在指定行插入空白行\n");
         printf("\t\t请按数字选择：\n");
 
         scanf("%s", c);
@@ -327,33 +338,36 @@ int insertMenu() {
 
 void loadFile(char *filename) {
     lineNum = 0;
-    struct line *tmp, *info;
-    start = (struct line *) malloc(sizeof(struct line));
-    info = start;
+    struct line *tmp;
+    struct line *start2;
     char c;
     FILE *fp = fopen(filename, "r");
     tmp = NULL;
-    if (DEBUG) {
-        printf("-1=start=%s==%d==\n", __FUNCTION__, start->num);
-        time_t lt = time(NULL);
-        printf("-1==%s==time====%ld\n", __FUNCTION__, lt);
-    }
-    while ((c = fgetc(fp)) != EOF && c != '\n') {
-        if (DEBUG) {
-            time_t lt = time(NULL);
-            printf("while==%s==time====%ld\n", __FUNCTION__, lt);
-        }
-        int i = 0;
-        info->text[i] = c;
-        i++;
-        while ((c = fgetc(fp)) != '\n' && c != EOF) {
-            info->text[i] = c;
-            i++;
-        }
-        if (c != EOF) {
-            info->text[i] = '\n';
+    struct line *info = (struct line *) malloc(sizeof(struct line));
+    while ((c = fgetc(fp)) != EOF) {
+        if (tmp) {
+            printf("%d######text:%s\n", tmp->num, tmp->text);
+        } else {
+            printf("tmp is NULL\n");
         }
 
+        int i = 0;
+        if (c == '\n') {
+            info->text[i] = '\n';
+        } else {
+            info->text[i] = c;
+            i++;
+            // todo 需要检测c==EOF吗？
+            while ((c = fgetc(fp)) != '\n' && c != EOF) {
+                info->text[i] = c;
+                i++;
+            }
+            if (c == EOF) {
+                printf("EOF:%d\n", c);
+            }
+            // 空行如何识别？空行是10#10
+            info->text[i] = '\n';
+        }
         lineNum++;
         info->num = lineNum;
         info->next = (struct line *) malloc(sizeof(struct line));
@@ -363,6 +377,10 @@ void loadFile(char *filename) {
         }
         info->prior = tmp;
         tmp = info;
+        if (start == NULL) {
+            start = info;
+        }
+
         info = info->next;
     }
     if (tmp == NULL) {
@@ -371,43 +389,47 @@ void loadFile(char *filename) {
         last = NULL;
         return;
     }
-    if (DEBUG) {
-        printf("0=start=%s==%d==\n", __FUNCTION__, start->num);
-        printf("0=last=%s==%d==\n", __FUNCTION__, tmp->num);
-        time_t lt = time(NULL);
-        printf("0==%s==time====%ld\n", __FUNCTION__, lt);
-    }
-    if (DEBUG) {
-        time_t lt = time(NULL);
-        printf("3==%s==time====%ld\n", __FUNCTION__, lt);
-    }
+
     tmp->next = NULL;
-    if (DEBUG) {
-        time_t lt = time(NULL);
-        printf("3.5==%s==time====%ld\n", __FUNCTION__, lt);
-    }
     last = tmp;
-    if (DEBUG) {
-        time_t lt = time(NULL);
-        printf("4==%s==time====%ld\n", __FUNCTION__, lt);
-    }
+
+    struct line *info6;
+//    start = start2;
     start->prior = NULL;
-    if (DEBUG) {
-        time_t lt = time(NULL);
-        printf("5==%s==time====%ld\n", __FUNCTION__, lt);
+    info6 = start;
+    printf("===========info6 start============\n");
+    while (info6) {
+        printf("num:%d######text:%s\n", info6->num, info6->text);
+//        printf("num:%d######text:%s\n", info6->next->num, info6->next->text);
+//        printf("num:%d######text:%s\n", info6->next->next->num, info6->next->next->text);
+//    printf("num:%d######text:%s\n", last->num, last->text);
+        info6 = info6->next;
     }
+    printf("===========info6 end============\n");
+//    printf("===========info6 start============\n");
+//    printf("num:%d######text:%s\n", info6->num, info6->text);
+//    printf("num:%d######text:%s\n", info6->next->num, info6->next->text);
+//    printf("num:%d######text:%s\n", info6->next->next->num, info6->next->next->text);
+////    printf("num:%d######text:%s\n", last->num, last->text);
+//    printf("===========info6 end============\n");
+
+
+
+//    while (info6) {
+//        printf("222last%s#####text:%s\n", __FUNCTION__, last->text);
+//        printf("222last-num%s#####num:%d\n", __FUNCTION__, last->num);
+//        printf("2222222666%s#####text:%s\n", __FUNCTION__, info6->text);
+//        printf("222222222222s666%s#####num:%d\n", __FUNCTION__, info6->num);
+//        info6 = info6->next;
+//    }
+
+
+
+
+
     free(info);
-    if (DEBUG) {
-        time_t lt = time(NULL);
-        printf("6==%s==time====%ld\n", __FUNCTION__, lt);
-    }
     fclose(fp);
-    if (DEBUG) {
-        printf("%s==start==%s\n", __FUNCTION__, start->text);
-        printf("%s==last==%s\n", __FUNCTION__, last->text);
-        printf("start===%s====%d\n", start->text, start->num);
-        printf("last===%s====%d\n", last->text, last->num);
-    }
+    printf("%s####start:%d\n", __FUNCTION__, start->num);
 }
 
 void displayAll() {
@@ -533,9 +555,8 @@ void insertInLineNum() {
     // 目标行已经被修改，需要把它放进原来的链表中吗？回答是：不需要。
 }
 
-void insertOneLine()
-{
-    if(start == NULL){
+void insertOneLine() {
+    if (start == NULL) {
         printf("%s\n", FILE_IS_EMPTY);
         return;
     }
@@ -544,34 +565,34 @@ void insertOneLine()
     scanf("%d", &lineNum);
 //    return;
     struct line *targetLine = findLineBy(lineNum);
-    if(targetLine == NULL){
+    if (targetLine == NULL) {
         printf("不存在%d行\n", lineNum);
         return;
     }
     printf("输入数据:\n");
 //    char *str = NULL;
-    char *str = (char *)malloc(sizeof(char) * MAX_LEN);
+    char *str = (char *) malloc(sizeof(char) * MAX_LEN);
     scanf("%s", str);
 //    char *str2 = NULL;
-    char *str2 = (char *)malloc(sizeof(char) * MAX_LEN);
+    char *str2 = (char *) malloc(sizeof(char) * MAX_LEN);
     printf("0str2 = %s\n", str2);
     fgets(str2, MAX_LEN, stdin);
-    char *newStr = (char *)malloc(sizeof(char) * MAX_LEN);
+    char *newStr = (char *) malloc(sizeof(char) * MAX_LEN);
     strcat(newStr, str);
     strcat(newStr, str2);
     printf("str = %s\nstr2 = %s\n", str, str2);
-    struct line *newLine = (struct line *)malloc(sizeof(struct line));
+    struct line *newLine = (struct line *) malloc(sizeof(struct line));
     strcpy(newLine->text, newStr);
     printf("newStr = %s\n", newStr);
     // 此处的链表操作，容易出现死循环
     newLine->prior = targetLine->prior;
     printf("targetLine->prior:%p\n", targetLine->prior);
     newLine->next = targetLine;
-    if(targetLine->prior){
+    if (targetLine->prior) {
         targetLine->prior->next = newLine;
     }
     targetLine->prior = newLine;
-    if(targetLine->num == 1){
+    if (targetLine->num == 1) {
         start = newLine;
     }
     free(newLine);
@@ -581,13 +602,53 @@ void insertOneLine()
     struct line *info2;
     info2 = start;
     int i = 0;
-    while (info2){
+    while (info2) {
         printf("info->num:%d###info->text:%s\n", info2->num, info2->text);
         info2 = info2->next;
         i++;
-        if(i == 4){
+        if (i == 4) {
             break;
         }
+    }
+    save(filename, "w");
+}
+
+void insertEmptyLine() {
+    if (start == NULL) {
+        printf("%s\n", FILE_IS_EMPTY);
+        return;
+    }
+    int lineNum;
+    printf("输入行号：\n");
+    scanf("%d", &lineNum);
+//    lineNum = 2;
+    struct line *targetLine = findLineBy(lineNum);
+    if (targetLine == NULL) {
+        printf("%s\n", "目标行不存在");
+        return;
+    }
+
+    struct line *newLine = (struct line *) malloc(sizeof(struct line));
+    newLine->text[0] = '\n';
+//    newLine->text[1] = '\0';
+
+    // 在首行插入
+    if (start->num == targetLine->num) {
+        newLine->next = targetLine;
+        start = newLine;
+    } else {
+        newLine->next = targetLine;
+        newLine->prior = targetLine->prior;
+        targetLine->prior->next = newLine;
+        targetLine->prior = newLine;
+    }
+//
+    struct line *info4;
+//    struct line *info4 = (struct line *) malloc(sizeof(struct line));
+    info4 = start;
+    while (info4) {
+        printf("info4:%s\n", info4->text);
+        info4 = info4->next;
     }
 
     save(filename, "w");

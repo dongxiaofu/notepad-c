@@ -13,4 +13,8 @@ stdlib.h
 -
 unistd.h
 -
+time.h
+-
+strings.h
+-
 
