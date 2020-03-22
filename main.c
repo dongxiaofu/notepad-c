@@ -98,6 +98,10 @@ BOOL fileExists(char *filename);
 // 新建文件
 void createFile(char *filename);
 
+// 增删文件后，调整行数
+// 需要调整的文件行的起始行；type：0.减，1.加
+void repaireLineList(struct line *startLine, int type);
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("usage:notepad filename\n");
@@ -108,9 +112,10 @@ int main(int argc, char *argv[]) {
     filename = argv[1];
     createFile(filename);
 
+    loadFile(filename);
+
     do {
         int c = firstMenu();
-        loadFile(filename);
         action(c);
     } while (1);
 
@@ -140,6 +145,7 @@ void action(int menu) {
             break;
         case 4:
             //保存
+            save(filename, "w");
             break;
         case 5:
             // 退出
@@ -263,14 +269,15 @@ void deleteLine(int lineNum) {
         if (start) {
             start->prior = NULL;
         }
-        save(filename, mode);
+        repaireLineList(start, 0);
+//        save(filename, mode);
         return;
     }
     // 尾行
     if (lineNum == last->num) {
         last = targetLine->prior;
         last->next = NULL;
-        save(filename, mode);
+//        save(filename, mode);
         return;
     }
     // 其他
@@ -282,7 +289,11 @@ void deleteLine(int lineNum) {
         targetLine->prior->next = targetLine->next;
         targetLine->next->prior = targetLine->prior;
     }
-    save(filename, mode);
+
+    repaireLineList(targetLine->next, 0);
+
+
+//    save(filename, mode);
     return;
 }
 
@@ -436,7 +447,7 @@ void displayAll() {
     struct line *info;
     info = start;
     while (info) {
-        printf("%s", info->text);
+        printf("%d %s", info->num, info->text);
         info = info->next;
     }
 }
@@ -457,36 +468,91 @@ void insertFunction() {
     }
 }
 
+// 插入之后，只有一行，last等于start吗？
+// start 必须明确，last可以模糊
+// start 与 last 值相同，但指向不同
 void insert() {
     char *str = (char *) malloc(sizeof(char) * MAX_LEN);
     printf("输入数据：\n");
     scanf("%s", str);
-    char *str2 = getStrFromFile();
-    FILE *fp = fopen(filename, "w");
-    fputs(str, fp);
+    char *text = (char *) malloc(sizeof(char) * MAX_LEN);
+    memcpy(text, str, strlen(str));
     fgets(str, MAX_LEN, stdin);
-//    gets(str);
-    fputs(str, fp);
-//    fputc('\n', fp);
+    strcat(text, str);
+    struct line *newLine = (struct line *) malloc(sizeof(struct line));
+    strcpy(newLine->text, text);
+    newLine->prior = NULL;
+    newLine->next = start;
+    newLine->num = 1;
+    // 处理起来费事。
+    if(start == NULL){
+        start = last = newLine;
+    }else{
+        start->prior = newLine;
+        if(last->prior == NULL){
+            last->prior = start;
+        }
+        start = newLine;
+    }
+    repaireLineList(start->next, 1);
 
-    printf("str:%s\n", str);
-    printf("str2:%s\n", str2);
-    fputs(str2, fp);
-    fclose(fp);
-    save(filename, "a");
-    free(str);
+    return;
+//
+//    char *str2 = getStrFromFile();
+//    FILE *fp = fopen(filename, "w");
+//    fputs(str, fp);
+//    // 与上面的scanf结合使用，完整接收"how are you"这种有空格的数据；
+//    // 若没有scanf，不会阻塞等待用户输入数据。
+//    fgets(str, MAX_LEN, stdin);
+////    gets(str);
+//    fputs(str, fp);
+////    fputc('\n', fp);
+//
+//    fputs(str2, fp);
+//    fclose(fp);
+//    save(filename, "a");
+//    free(str);
 }
 
 void add() {
     char *str = (char *) malloc(sizeof(char) * MAX_LEN);
     printf("请输入数据：\n");
     scanf("%s", str);
-    FILE *fp = fopen(filename, "a");
-    fputs(str, fp);
+    char *text = (char *) malloc(sizeof(char) * MAX_LEN);
+    // 能够使用 strcpy 吗？
+    memcpy(text, str, strlen(str));
+    printf("0#####text = %s######str = %s\n", text, str);
     fgets(str, MAX_LEN, stdin);
-    fputs(str, fp);
-    fclose(fp);
-    free(str);
+    strcat(text, str);
+    printf("1#####text = %s######str = %s\n", text, str);
+    struct line *newLine = (struct line *) malloc(sizeof(struct line));
+    memcpy(newLine->text, text, strlen(text));
+    newLine->prior = last;
+    newLine->next = NULL;
+    if(last == NULL){
+        newLine->num = 1;
+        start = last = newLine;
+    }else{
+        if(start->next == NULL){
+            start->next = newLine;
+        }
+        newLine->num = last->num + 1;
+        last = newLine;
+    }
+
+    free(newLine);
+    newLine = NULL;
+
+    // 旧方法
+//    char *str = (char *) malloc(sizeof(char) * MAX_LEN);
+//    printf("请输入数据：\n");
+//    scanf("%s", str);
+//    FILE *fp = fopen(filename, "a");
+//    fputs(str, fp);
+//    fgets(str, MAX_LEN, stdin);
+//    fputs(str, fp);
+//    fclose(fp);
+//    free(str);
 }
 
 void insertInLineNum() {
@@ -550,9 +616,9 @@ void insertInLineNum() {
         free(cache);
         cache = NULL;
     }
-    // 文件存盘
-    save(filename, "w");
-    // 目标行已经被修改，需要把它放进原来的链表中吗？回答是：不需要。
+//    // 文件存盘
+//    save(filename, "w");
+//    // 目标行已经被修改，需要把它放进原来的链表中吗？回答是：不需要。
 }
 
 void insertOneLine() {
@@ -579,6 +645,7 @@ void insertOneLine() {
     strcat(newStr, str2);
     printf("str = %s\nstr2 = %s\n", str, str2);
     struct line *newLine = (struct line *) malloc(sizeof(struct line));
+    newLine->num = targetLine->num;
     strcpy(newLine->text, newStr);
     printf("newStr = %s\n", newStr);
     // 此处的链表操作，容易出现死循环
@@ -595,17 +662,20 @@ void insertOneLine() {
     free(newLine);
     newLine = NULL;
 
-    struct line *info2;
-    info2 = start;
-    int i = 0;
-    while (info2) {
-        info2 = info2->next;
-        i++;
-        if (i == 4) {
-            break;
-        }
-    }
-    save(filename, "w");
+    // 在此操作之后，能释放掉targetLine吗？
+    repaireLineList(targetLine, 1);
+
+//    struct line *info2;
+//    info2 = start;
+//    int i = 0;
+//    while (info2) {
+//        info2 = info2->next;
+//        i++;
+//        if (i == 4) {
+//            break;
+//        }
+//    }
+//    save(filename, "w");
 }
 
 void insertEmptyLine() {
@@ -625,6 +695,7 @@ void insertEmptyLine() {
     struct line *newLine = (struct line *) malloc(sizeof(struct line));
     newLine->text[0] = '\n';
 
+    newLine->num = targetLine->num;
     // 在首行插入
     if (start->num == targetLine->num) {
         newLine->next = targetLine;
@@ -635,14 +706,16 @@ void insertEmptyLine() {
         targetLine->prior->next = newLine;
         targetLine->prior = newLine;
     }
-    struct line *info4;
-    info4 = start;
-    while (info4) {
-        printf("info4:%s\n", info4->text);
-        info4 = info4->next;
-    }
 
-    save(filename, "w");
+    repaireLineList(targetLine, 1);
+//    struct line *info4;
+//    info4 = start;
+//    while (info4) {
+//        printf("info4:%s\n", info4->text);
+//        info4 = info4->next;
+//    }
+
+//    save(filename, "w");
 }
 
 char *getStrFromFile() {
@@ -835,7 +908,7 @@ void replace() {
 //    strcpy(newStr, rightCache);
 
     printf("处理结果：\n");
-    printf("已经将第%d行第%d列的%s替换为%s\n", targetLine->num, position+1, str, replaceStr);
+    printf("已经将第%d行第%d列的%s替换为%s\n", targetLine->num, position + 1, str, replaceStr);
     printf("新数据为：\n");
     printf("%s\n", newStr);
 
@@ -874,4 +947,20 @@ void createFile(char *filename) {
         FILE *fp = fopen(filename, "w");
         fclose(fp);
     }
+}
+
+void repaireLineList(struct line *startLine, int type) {
+    struct line *current = (struct line *) malloc(sizeof(struct line));
+    current = startLine;
+    while (current != NULL) {
+        if (type == 0) {
+            current->num = current->num - 1;
+        } else {
+            current->num = current->num + 1;
+        }
+        current = current->next;
+    }
+
+    free(current);
+    current = NULL;
 }
