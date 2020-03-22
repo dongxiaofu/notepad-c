@@ -4,6 +4,7 @@
 #include <time.h>
 #include <strings.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define DEBUG 0
 #define FILE_IS_EMPTY "文件为空，请先增加内容"
@@ -101,6 +102,8 @@ void createFile(char *filename);
 // 增删文件后，调整行数
 // 需要调整的文件行的起始行；type：0.减，1.加
 void repaireLineList(struct line *startLine, int type);
+// 自动保存数据
+void *bgSave();
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -113,6 +116,11 @@ int main(int argc, char *argv[]) {
     createFile(filename);
 
     loadFile(filename);
+
+    pthread_t pthread;
+    if(pthread_create(&pthread, NULL, bgSave, NULL) < 0){
+        perror("pthread create\n");
+    }
 
     do {
         int c = firstMenu();
@@ -963,4 +971,20 @@ void repaireLineList(struct line *startLine, int type) {
 
     free(current);
     current = NULL;
+}
+
+void *bgSave()
+{
+    time_t start,current;
+    time(&start);
+    int duration = 2;
+    while (1){
+        time(&current);
+        if((current - start)%duration == 0){
+            printf("保存数据:%ld\n", time(NULL));
+            save(filename, "w");
+        }
+        sleep(20);
+    }
+
 }
