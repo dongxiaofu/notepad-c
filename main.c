@@ -102,15 +102,22 @@ void createFile(char *filename);
 // 增删文件后，调整行数
 // 需要调整的文件行的起始行；type：0.减，1.加
 void repaireLineList(struct line *startLine, int type);
+
 // 自动保存数据
 void *bgSave();
+
+// 统计汉字字数
+int count_Chinese_character();
+// 显示汉字字数
+void display_character_count();
+
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("usage:notepad filename\n");
         return 0;
     }
-
+    system("clear");
     filename = (char *) malloc(sizeof(char) * 10);
     filename = argv[1];
     createFile(filename);
@@ -118,7 +125,7 @@ int main(int argc, char *argv[]) {
     loadFile(filename);
 
     pthread_t pthread;
-    if(pthread_create(&pthread, NULL, bgSave, NULL) < 0){
+    if (pthread_create(&pthread, NULL, bgSave, NULL) < 0) {
         perror("pthread create\n");
     }
 
@@ -191,6 +198,9 @@ void action(int menu) {
             break;
         case 30:
             openFile();
+            break;
+        case 32:
+            display_character_count();
             break;
         default:
             printf("菜单输入错误\n");
@@ -337,7 +347,7 @@ int firstMenu() {
         printf("\t\t6.显示全部\n");
         printf("\t\t7.打开\n");
 //        printf("\t\t请选择一项功能：\n");
-
+        printf("\033[31mThis text is red \033[0mThis text has default color\n");
         printf("\t\t21.在开头插入数据\n");
         printf("\t\t22.追加数据\n");
         printf("\t\t23.返回上级菜单\n");
@@ -349,6 +359,7 @@ int firstMenu() {
         printf("\t\t29.字符串替换（一个）\n");
         printf("\t\t30.打开文件\n");
         printf("\t\t31.新建文件\n");
+        printf("\t\t32.统计中文字数\n");
 
         printf("\t\t请按数字选择：\n");
 
@@ -493,11 +504,11 @@ void insert() {
     newLine->next = start;
     newLine->num = 1;
     // 处理起来费事。
-    if(start == NULL){
+    if (start == NULL) {
         start = last = newLine;
-    }else{
+    } else {
         start->prior = newLine;
-        if(last->prior == NULL){
+        if (last->prior == NULL) {
             last->prior = start;
         }
         start = newLine;
@@ -537,11 +548,11 @@ void add() {
     memcpy(newLine->text, text, strlen(text));
     newLine->prior = last;
     newLine->next = NULL;
-    if(last == NULL){
+    if (last == NULL) {
         newLine->num = 1;
         start = last = newLine;
-    }else{
-        if(start->next == NULL){
+    } else {
+        if (start->next == NULL) {
             start->next = newLine;
         }
         newLine->num = last->num + 1;
@@ -865,7 +876,7 @@ void replace() {
     typedef struct {
         struct line *line;  // 包含关键词的行
         int position;   // 关键词在目标行的列号
-        int flag:1;     // 是否存在搜索结果
+        int flag: 1;     // 是否存在搜索结果
     } Result;
     struct line *line = (struct line *) malloc(sizeof(struct line));
     line = start;
@@ -973,18 +984,43 @@ void repaireLineList(struct line *startLine, int type) {
     current = NULL;
 }
 
-void *bgSave()
-{
-    time_t start,current;
+void *bgSave() {
+    time_t start, current;
     time(&start);
-    int duration = 2;
-    while (1){
+    int duration = 20;
+    while (1) {
         time(&current);
-        if((current - start)%duration == 0){
-            printf("保存数据:%ld\n", time(NULL));
+        if ((current - start) % duration == 0) {
+//            printf("保存数据:%ld\n", time(NULL));
             save(filename, "w");
         }
         sleep(20);
     }
-
 }
+
+int count_Chinese_character() {
+    if (start == NULL) {
+        return 0;
+    }
+    struct line *info;
+    info = start;
+    int counter = 0;
+    while (info) {
+        char *text = info->text;
+        for (int i = 0; i < strlen(text); i++) {
+            if ((int) text[i] < 0) {
+                counter++;
+            }
+        }
+        info = info->next;
+    }
+
+    int character_num = (int) counter / 3;
+    return character_num;
+}
+
+void display_character_count(){
+    int num = count_Chinese_character();
+    printf("汉字总数：%d\n", num);
+}
+
