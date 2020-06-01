@@ -108,8 +108,15 @@ void *bgSave();
 
 // 统计汉字字数
 int count_Chinese_character();
+
 // 显示汉字字数
 void display_character_count();
+
+// 文件另存为
+void save_as(char *filename);
+
+// 文件另存为，菜单直接调用
+void save_as_new_file();
 
 
 int main(int argc, char *argv[]) {
@@ -201,6 +208,9 @@ void action(int menu) {
             break;
         case 32:
             display_character_count();
+            break;
+        case 33:
+            save_as_new_file();
             break;
         default:
             printf("菜单输入错误\n");
@@ -360,6 +370,7 @@ int firstMenu() {
         printf("\t\t30.打开文件\n");
         printf("\t\t31.新建文件\n");
         printf("\t\t32.统计中文字数\n");
+        printf("\t\t33.文件另存为为\n");
 
         printf("\t\t请按数字选择：\n");
 
@@ -1019,8 +1030,37 @@ int count_Chinese_character() {
     return character_num;
 }
 
-void display_character_count(){
+void display_character_count() {
     int num = count_Chinese_character();
     printf("汉字总数：%d\n", num);
+}
+
+void save_as(char *filename) {
+    save(filename, "w");
+}
+
+// 文件另存为，菜单直接调用
+void save_as_new_file() {
+    printf("%s\n", "请输入文件名");
+
+    char *filename = (char *) malloc(sizeof(char) * 32);
+    scanf("%s", filename);
+
+    // 检查文件是否存在
+    BOOL exists = fileExists(filename);
+    if (exists) {
+        printf("文件 %s 已经存在，确定要使用这个文件名吗？\n", filename);
+        printf("%s\n", "输入0取消，输入1确定");
+        char *chose = (char *) malloc(sizeof(char) * 8);
+        scanf("%s", chose);
+        if (atoi(chose) == 0) {
+            free(filename);
+            free(chose);
+            return;
+        }
+        free(chose);
+    }
+    save_as(filename);
+    free(filename);
 }
 
