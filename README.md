@@ -33,8 +33,7 @@
 15.统计中文字数。
     一个中文由三个负整数表示。统计字符串中所有负数编码的个数，然后除以3，结果是中文字数。
 16.文件另存为
-17.十六进制查看文件
-    1>仅完成查看英文文本文件。
+17.十六进制查看文件--查看英文文本文件
 ##### 未完成功能
 18.其他功能，看我自己需要什么功能，或者模仿其他编辑器。
 19.设置文档密码
@@ -215,5 +214,15 @@ warning: GCC does not allow variable declarations in for loop initializers befor
 用C开发查看HEX字节码的工具
 
 https://blog.csdn.net/shaoyubin999/article/details/82950806
+
+用C语言开发查看HEX字节码的工具--看程序如何进化
+
+https://blog.csdn.net/shaoyubin999/article/details/82958273
+
+你好，用 printf("%2x ", ch) 输出数据为：
+
+00000000: ffffffe4  ffffffbd  ffffffa0  ffffffe5  ffffffa5  ffffffbd   a                                      .......
+
+怎么才能只输出 e4 bd a0 e5 等呢？即，去掉前面的四个f。
 
 

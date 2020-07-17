@@ -133,6 +133,8 @@ void display_row_number_as_hex(int number);
 // 十六进制查看数据，输出一行字符串
 void display_line_in_hex(char *str);
 
+// 将一个字符用十六进制形式输出
+void display_char_as_hex(char ch);
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -1107,20 +1109,8 @@ void display_as_hex() {
             display_row_number_as_hex(row_number);
         }
         for (int i = 0; i < strlen(text); i++) {
-//            counter++;
-            int *temp = to_hex((int) text[i]);
-            int size = temp[8];
-            for (int i = size; i >= 0; i--) {
-                // 字符 '0' 的ascii code是48
-                // A - 65,F - 70
-                if (temp[i] >= 65 && temp[i] <= 70) {
-                    printf("%c", temp[i]);
-                } else {
-                    printf("%d", temp[i]);
-                }
-            }
+            display_char_as_hex(text[i]);
             counter++;
-            printf(" ");
 
             // 使用isdigit 需 #include <ctype.h>
 //            if (isdigit(text[i]) || isalpha(text[i])) {
@@ -1226,3 +1216,19 @@ void display_line_in_hex(char *str) {
     return;
 };
 
+void display_char_as_hex(char ch) {
+//    printf("%2x ", ch);  //按16进制输出读入的字节值
+    // 上面这句，和下面的几乎等价。
+    int *temp = to_hex((int) ch);
+    int size = temp[8];
+    for (int i = size; i >= 0; i--) {
+        // 字符 '0' 的ascii code是48
+        // A - 65,F - 70
+        if (temp[i] >= 65 && temp[i] <= 70) {
+            printf("%c", temp[i]);
+        } else {
+            printf("%d", temp[i]);
+        }
+    }
+    printf(" ");    // 68 65 6C 字符之间的空格
+}
