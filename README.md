@@ -32,8 +32,18 @@
     多线程，调试，低效。查了资料，却没仔细去看。
 15.统计中文字数。
     一个中文由三个负整数表示。统计字符串中所有负数编码的个数，然后除以3，结果是中文字数。
+16.文件另存为
+17.十六进制查看文件
+    1>仅完成查看英文文本文件。
 ##### 未完成功能
-15.其他功能，看我自己需要什么功能，或者模仿其他编辑器。
+18.其他功能，看我自己需要什么功能，或者模仿其他编辑器。
+19.设置文档密码
+    将密码存在到单独文件中，用二进制存储。
+    文档的标识，用md5这种类型函数提取指纹，指纹+密码，一起存储。
+    在保存文件的时候，更新指纹。
+    打开文件时，检查是否存在指纹+密码锁，若存在，要求输入密码。
+20.十六进制查看文件--查看中英混合文件
+21.十六进制查看文件--查看可a.img，dd 生成的软盘镜像十六进制查看文件--查看jpg图片文件
 ##### 下级菜单与操作联系
 1.所有菜单（不同级别）使用一套编码，编码非常大。
 
@@ -196,5 +206,14 @@ ld: symbol(s) not found for architecture x86_64
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 
 在文件 main.c 中的 char *openFile()，分支 error-08
+
+
+warning: GCC does not allow variable declarations in for loop initializers before C99
+
+### 参考资料
+
+用C开发查看HEX字节码的工具
+
+https://blog.csdn.net/shaoyubin999/article/details/82950806
 
 

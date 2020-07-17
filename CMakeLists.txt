@@ -3,4 +3,4 @@ project(notepad C)
 
 set(CMAKE_C_STANDARD 90)
 
-add_executable(notepad main.c)
+add_executable(notepad main.c secret/password.h secret/password.c)

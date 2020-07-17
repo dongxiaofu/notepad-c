@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <strings.h>
-#include <unistd.h>
 #include <pthread.h>
+#include <ctype.h>
 
 #define DEBUG 0
 #define FILE_IS_EMPTY "文件为空，请先增加内容"
@@ -118,6 +118,21 @@ void save_as(char *filename);
 // 文件另存为，菜单直接调用
 void save_as_new_file();
 
+// 十六进制显示数据
+void display_as_hex();
+
+// 转为十六进制
+int *to_hex(int n);
+
+// 将10-15转为A-F
+int to_char(int code);
+
+// 输出十六进制行号
+void display_row_number_as_hex(int number);
+
+// 十六进制查看数据，输出一行字符串
+void display_line_in_hex(char *str);
+
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -211,6 +226,9 @@ void action(int menu) {
             break;
         case 33:
             save_as_new_file();
+            break;
+        case 34:
+            display_as_hex();
             break;
         default:
             printf("菜单输入错误\n");
@@ -357,7 +375,7 @@ int firstMenu() {
         printf("\t\t6.显示全部\n");
         printf("\t\t7.打开\n");
 //        printf("\t\t请选择一项功能：\n");
-        printf("\033[31mThis text is red \033[0mThis text has default color\n");
+//        printf("\033[31mThis text is red \033[0mThis text has default color\n");  // 输出红色文字
         printf("\t\t21.在开头插入数据\n");
         printf("\t\t22.追加数据\n");
         printf("\t\t23.返回上级菜单\n");
@@ -371,6 +389,7 @@ int firstMenu() {
         printf("\t\t31.新建文件\n");
         printf("\t\t32.统计中文字数\n");
         printf("\t\t33.文件另存为为\n");
+        printf("\t\t34.十六进制查看文件\n");
 
         printf("\t\t请按数字选择：\n");
 
@@ -416,7 +435,7 @@ void loadFile(char *filename) {
     lineNum = 0;
     struct line *tmp;
     char c;
-    FILE *fp = fopen(filename, "r");
+    FILE *fp = fopen(filename, "rb");
     tmp = NULL;
     struct line *info = (struct line *) malloc(sizeof(struct line));
     while ((c = fgetc(fp)) != EOF) {
@@ -1063,4 +1082,147 @@ void save_as_new_file() {
     save_as(filename);
     free(filename);
 }
+
+// 16个字符一行
+// 计数器 counter，统计十六进制化的字符
+// counter % 16 == 0时，换行
+void display_as_hex() {
+    if (start == NULL) {
+        printf("%s\n", FILE_IS_EMPTY);
+        return;
+    }
+    // 如果是16，hello,world!.how 字符串的末尾字符w会被截掉
+//    char *str = (char *) malloc(sizeof(char) * 16);
+    char *str = (char *) malloc(sizeof(char) * 17);
+    int str_index = 0;
+    int counter = 0;
+    int row_number = 0;
+    struct line *info = start;
+    while (info) {
+        char *text = info->text;
+        if (counter == 0) {
+//            printf("%#.8x:", counter - 1);    // 输出：0x00000020:
+//            printf("%.8X:", counter - 1);     // 输出：0X00000020:
+            // 输出行号
+            display_row_number_as_hex(row_number);
+        }
+        for (int i = 0; i < strlen(text); i++) {
+//            counter++;
+            int *temp = to_hex((int) text[i]);
+            int size = temp[8];
+            for (int i = size; i >= 0; i--) {
+                // 字符 '0' 的ascii code是48
+                // A - 65,F - 70
+                if (temp[i] >= 65 && temp[i] <= 70) {
+                    printf("%c", temp[i]);
+                } else {
+                    printf("%d", temp[i]);
+                }
+            }
+            counter++;
+            printf(" ");
+
+            // 使用isdigit 需 #include <ctype.h>
+//            if (isdigit(text[i]) || isalpha(text[i])) {
+//                str[str_index++] = (char) text[i];
+//            } else {
+//                str[str_index++] = '.';
+////                str[i] = (char) text[i];
+//            }
+
+            // 32 到 126 之间是可见字符
+            if (text[i] >= 32 && text[i] <= 126) {
+                str[str_index++] = (char) text[i];
+            } else {
+                str[str_index++] = '.';
+            }
+
+            if ((counter > 0) && (counter % 16 == 0)) {
+                display_line_in_hex(str);
+                printf("\n");
+                memset(str, 0, 17);
+                str_index = 0;
+                row_number++;
+                // 输出行号
+                display_row_number_as_hex(row_number);
+            }
+        }
+        info = info->next;
+    }
+    if (strlen(str) > 0) {
+        int mod = counter % 16;
+        int width = 16 - mod;
+        int space_num = width * 3 - 1;
+        for (int i = 0; i < space_num; i++) {
+            printf("%c", ' ');
+        }
+        display_line_in_hex(str);
+    }
+    free(str);
+}
+
+// 好容易生疏
+// 前阵子，十进制数转二进制，我已经很熟练了。现在，类似问题，竟然又不能迅速写出来。
+int *to_hex(int n) {
+    // 在哪里释放内存？
+    int *res = (int *) malloc(sizeof(int) * 9);
+    int index = 0;
+    do {
+        int mod = n % 16;
+        if (mod < 10) {
+            res[index++] = mod;
+        } else {
+            int temp = to_char(mod);
+            res[index++] = temp;
+        }
+        n /= 16;
+        if (n < 16) {
+            int temp = to_char(n);
+            res[index++] = n;
+        }
+    } while (n >= 16);
+    res[8] = index - 1;
+    return res;
+}
+
+int to_char(int code) {
+    if (code < 10) {
+        return code;
+    }
+    int temp;
+    switch (code) {
+        case 10:
+            temp = 'A';
+            break;
+        case 11:
+            temp = 'B';
+            break;
+        case 12:
+            temp = 'C';
+            break;
+        case 13:
+            temp = 'D';
+            break;
+        case 14:
+            temp = 'E';
+            break;
+        case 15:
+            temp = 'F';
+            break;
+        default:
+            temp = '#';
+    }
+    return temp;
+}
+
+void display_row_number_as_hex(int number) {
+    printf("%.8X: ", number);     // 输出：00000050:
+    return;
+}
+
+void display_line_in_hex(char *str) {
+    printf("%-10c", ' ');
+    printf("%-30s", str);
+    return;
+};
 
